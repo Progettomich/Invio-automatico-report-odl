@@ -1,5 +1,5 @@
 # Invio-automatico-report-ODL
-Generatore report settimanale automatico scritto in Python
+Generatore report giornaliero automatico scritto in Python
 
 ## Descrizione del progetto
 Questo progetto Python automatizza l'invio dei report degli Ordini di Lavoro (ODL) ai tecnici. 
