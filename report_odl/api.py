@@ -11,7 +11,7 @@ logging.basicConfig(
 
 # lista tecnici
 TECNICI_LIST = [
-    "Addamo FEDERICO",
+    "ADDAMO FEDERICO",
     "PIETRAGALLA CANIO",
     "URBINA ZABALETA MARIA",
     "GALIMBERTI CARLO",
