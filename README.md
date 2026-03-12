@@ -8,9 +8,9 @@ Scarica i dati da un'API interna, li elabora filtrando per tecnico, genera repor
 ## Struttura del repository
 
 odl-report-automation/
- 1. [Richiamo dei dati tramite l'API](api.py)
- 2. [Filtraggio dei Dati](processing.py)
- 3. [Creazione pagina HTML](html_report.py)
- 4. [Richiesta Body mail](email_sender.py)
- 5. [Invio periodico](scheduler.py)
+ 1. [Richiamo_dei_dati_tramite_l'API](api.py)
+ 2. [Filtraggio_dei_Dati](processing.py)
+ 3. [Creazione_pagina_HTML](html_report.py)
+ 4. [Richiesta_Body_mail](email_sender.py)
+ 5. [Invio_periodico](scheduler.py)
     
