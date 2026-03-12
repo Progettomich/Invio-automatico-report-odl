@@ -16,7 +16,7 @@ def run_weekly_report():
     """
 
     # 1️⃣ Scarica tutti gli ODL tramite la funzione API
-    df_all = fetch_tutti_odl()
+    df_all = fetch_tutti_odl_tecnici
 
     # 2️⃣ Elabora i dati e ritorna un dizionario {tecnico: df_tecnico}
     tecnici_dict = process_data(df_all)
