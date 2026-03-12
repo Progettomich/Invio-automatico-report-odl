@@ -20,9 +20,9 @@ def build_html(tecnico, df_tecnico):
     """
 
     # 1️⃣ Calcolo KPI principali
-    num_in_corso = (df_tecnico['stato'] == 'IN CORSO').sum()
-    num_sospesi = (df_tecnico['stato'] == 'SOSPESO').sum()
-    num_da_fare = (df_tecnico['stato'] == 'DA FARE').sum()
+    num_in_corso = (df_tecnico['stato odl'] == 'IN CORSO').sum()
+    num_sospesi = (df_tecnico['stato odl'] == 'SOSPESO').sum()
+    num_da_fare = (df_tecnico['stato odl'] == 'DA FARE').sum()
 
     # 2️⃣ Generazione grafico a torta (stato ODL)
     fig1, ax1 = plt.subplots()
@@ -32,7 +32,7 @@ def build_html(tecnico, df_tecnico):
         autopct='%1.1f%%',
         colors=['#4CAF50', '#FF9800', '#F44336']
     )
-    ax1.set_title('Distribuzione ODL per stato')
+    ax1.set_title('Distribuzione ODL per stato odl')
 
     # Salvataggio grafico in memoria come base64
     buffer1 = BytesIO()
