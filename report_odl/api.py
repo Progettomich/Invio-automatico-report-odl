@@ -56,8 +56,6 @@ def fetch_tutti_odl(limit=100):
         if page >= total_pages:
             break
 
-        page += 1
-
     df = pd.DataFrame(all_odl)
 
     return df
