@@ -57,7 +57,7 @@ def build_html(tecnico, df_tecnico):
 
     # 4️⃣ Generazione tabella HTML
     # Manteniamo solo le colonne principali
-    df_tabella = df_tecnico[['ID_ODL', 'NOME_COMPLETO_RESP', 'stato', 'DT_APERTURA', 'giorni_trascorsi']]
+    df_tabella = df_tecnico[['id_odl', 'tecnico', 'stato', 'DT_APERTURA', 'giorni_trascorsi']]
     tabella_html = df_tabella.to_html(index=False, classes='table table-striped')
 
     # 5️⃣ Creazione della stringa HTML finale
