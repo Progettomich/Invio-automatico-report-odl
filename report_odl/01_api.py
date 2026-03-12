@@ -21,9 +21,9 @@ TECNICI_LIST = [
     "VALENTINO ANGELO"
 ]
 
-API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/rdi"
-API_USER = "**********"
-API_PASS = "**********"
+API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/report/odl"
+API_USER = "il_tuo_user"
+API_PASS = "la_tua_password"
 DATE_FROM = "2026-01-01"
 
 
