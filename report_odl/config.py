@@ -1,7 +1,7 @@
 # report_odl/config.py
 
 # --- Configurazione API ---
-API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/rdi"
+API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/report/odl"
 API_USER = ***********
 API_PASS = ***********
 DATE_FROM = "2026-01-01"
