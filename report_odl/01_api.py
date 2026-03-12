@@ -1,140 +1,92 @@
+
 import requests
 import pandas as pd
 import logging
 
+# configurazione del logging
 logging.basicConfig(
     filename="odl_report.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/report/odl"
+# lista tecnici
+TECNICI_LIST = [
+    "ADDAMO FEDERICO",
+    "PIETRAGALLA CANIO",
+    "URBINA ZABALETA MARIA",
+    "GALIMBERTI CARLO",
+    "RIZZO ALESSANDRO",
+    "GHILARDOTTI GILBERTO",
+    "VALENTINO ANGELO"
+]
+
+API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/rdi"
 API_USER = "**********"
 API_PASS = "**********"
 DATE_FROM = "2026-01-01"
 
-def fetch_tutti_odl(limit=100, page=1):
+
+def fetch_odl_tecnico(tecnico, limit=100):
+    """
+    Scarica tutti gli ODL per un singolo tecnico, gestendo la paginazione.
+    Ritorna un DataFrame con gli ODL di quel tecnico.
+    """
     all_odl = []
 
-    # 1) ADDAMO FEDERICO
+    # prima chiamata per capire quante pagine ci sono (se l'API lo espone)
     params = {
         "user": API_USER,
         "password": API_PASS,
         "limit": limit,
-        "page": page,
+        "page": 1,
         "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "ADDAMO FEDERICO",
-        "dateFrom": DATE_FROM
+        "tecnico": tecnico,            # ← singolo tecnico
+        "dateFrom": DATE_FROM          # ← stringa corretta
     }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
-        all_odl.extend(data["records"])
-        logging.info(f"ADDAMO FEDERICO: {len(data['records'])} record")
 
-    # 2) PIETRAGALLA CANIO
-    params = {
-        "user": API_USER,
-        "password": API_PASS,
-        "limit": limit,
-        "page": page,
-        "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "PIETRAGALLA CANIO",
-        "dateFrom": DATE_FROM
-    }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
-        all_odl.extend(data["records"])
-        logging.info(f"PIETRAGALLA CANIO: {len(data['records'])} record")
+    response = requests.get(API_BASE, params=params)
+    data = response.json()
 
-    # 3) URBINA ZABALETA MARIA
-    params = {
-        "user": API_USER,
-        "password": API_PASS,
-        "limit": limit,
-        "page": page,
-        "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "URBINA ZABALETA MARIA",
-        "dateFrom": DATE_FROM
-    }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
-        all_odl.extend(data["records"])
-        logging.info(f"URBINA ZABALETA MARIA: {len(data['records'])} record")
+    if not data or "records" not in data:
+        logging.warning(f"Nessun dato restituito per il tecnico {tecnico}")
+        return pd.DataFrame()
 
-    # 4) GALIMBERTI CARLO
-    params = {
-        "user": API_USER,
-        "password": API_PASS,
-        "limit": limit,
-        "page": page,
-        "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "GALIMBERTI CARLO",
-        "dateFrom": DATE_FROM
-    }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
-        all_odl.extend(data["records"])
-        logging.info(f"GALIMBERTI CARLO: {len(data['records'])} record")
+    all_odl.extend(data["records"])
+    total_pages = data.get("totalPages", 1)
 
-    # 5) RIZZO ALESSANDRO
-    params = {
-        "user": API_USER,
-        "password": API_PASS,
-        "limit": limit,
-        "page": page,
-        "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "RIZZO ALESSANDRO",
-        "dateFrom": DATE_FROM
-    }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
-        all_odl.extend(data["records"])
-        logging.info(f"RIZZO ALESSANDRO: {len(data['records'])} record")
+    # dalla pagina 2 fino all’ultima con un ciclo for
+    for page in range(2, total_pages + 1):
+        params["page"] = page
+        response = requests.get(API_BASE, params=params)
+        data = response.json()
 
-    # 6) GHILARDOTTI GILBERTO
-    params = {
-        "user": API_USER,
-        "password": API_PASS,
-        "limit": limit,
-        "page": page,
-        "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "GHILARDOTTI GILBERTO",
-        "dateFrom": DATE_FROM
-    }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
-        all_odl.extend(data["records"])
-        logging.info(f"GHILARDOTTI GILBERTO: {len(data['records'])} record")
+        if not data or "records" not in data:
+            break
 
-    # 7) VALENTINO ANGELO
-    params = {
-        "user": API_USER,
-        "password": API_PASS,
-        "limit": limit,
-        "page": page,
-        "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
-        "tecnico": "VALENTINO ANGELO",
-        "dateFrom": DATE_FROM
-    }
-    resp = requests.get(API_BASE, params=params)
-    resp.raise_for_status()
-    data = resp.json()
-    if data and "records" in data:
         all_odl.extend(data["records"])
-        logging.info(f"VALENTINO ANGELO: {len(data['records'])} record")
 
     df = pd.DataFrame(all_odl)
-    logging.info(f"Totale ODL recuperati: {len(df)}")
+    # opzionale: aggiungo una colonna con il nome del tecnico
+    if not df.empty:
+        df["tecnico"] = tecnico
+
     return df
+
+
+def fetch_tutti_odl_tecnici(limit=100):
+    """
+    Cicla su tutti i tecnici con un for e concatena i DataFrame.
+    """
+    df_list = []
+
+    for tecnico in TECNICI_LIST:
+        logging.info(f"Scarico ODL per il tecnico: {tecnico}")
+        df_tecnico = fetch_odl_tecnico(tecnico, limit=limit)
+        if not df_tecnico.empty:
+            df_list.append(df_tecnico)
+
+    if df_list:
+        return pd.concat(df_list, ignore_index=True)
+    else:
+        return pd.DataFrame()
