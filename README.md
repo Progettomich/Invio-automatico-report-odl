@@ -8,16 +8,9 @@ Scarica i dati da un'API interna, li elabora filtrando per tecnico, genera repor
 ## Struttura del repository
 
 odl-report-automation/
-│
-├── report_odl/
-│ ├── init.py # Trasforma la cartella in modulo Python
-│ ├── config.py # Configurazioni API, email e tecnici
-│ ├── api.py # Funzioni per GET/POST API
-│ ├── processing.py # Elaborazione dati e filtro per tecnico
-│ ├── html_report.py # Generazione report HTML e grafici
-│ ├── email_sender.py # Invio email o POST HTML
-│ └── scheduler.py # Programmazione esecuzione settimanale
-├── Dockerfile # Containerizzazione
-├── requirements.txt # Librerie Python necessarie
-├── README.md # Descrizione progetto
-└── main.py # Avvio esecuzione
+ 1. [Richiamo dei dati tramite l'API](api.py)
+ 2. [Filtraggio dei Dati](processing.py)
+ 3. [Creazione pagina HTML](html_report.py)
+ 4. [Richiesta Body mail](email_sender.py)
+ 5. [Invio periodico](scheduler.py)
+    
