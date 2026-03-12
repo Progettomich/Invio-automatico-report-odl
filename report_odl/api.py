@@ -21,8 +21,8 @@ TECNICI_LIST = [
 ]
 
 API_BASE = "http://10.38.169.149:3500/api/v1/zMaintenance/rdi"
-API_USER = "fgiacchibonetta"
-API_PASS = "Humanitas1!"
+API_USER = **********
+API_PASS = **********
 DATE_FROM = "2026-01-01"
 
 def fetch_tutti_odl(limit=100):
@@ -35,11 +35,11 @@ def fetch_tutti_odl(limit=100):
         params = {
             "user": API_USER,
             "password": API_PASS,
-            "limit": limit,
-            "page": page,
-            "stato": "IN CORSO,SOSPESO,DA FARE",
+            "limit": 100,
+            "page": 1,
+            "stato": "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
             "tecnico": ",".join(TECNICI_LIST),
-            "dateFrom": DATE_FROM
+            "dateFrom": 2026-01-01
         }
 
         response = requests.get(API_BASE, params=params)
