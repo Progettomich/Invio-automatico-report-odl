@@ -4,8 +4,8 @@ import requests
 BASE_URL = "http://10.38.169.149:3500/api/v1/zMaintenance/REPORT/ODL"
 
 # Credenziali e parametri fissi
-USER = "fgiacchibonetta"
-PASSWORD = "Humanitas1!"
+USER = "youruser"
+PASSWORD = "yourpass"
 STATI = "IN CORSO,SOSPESO,DA FARE"
 DATE_FROM = "2026-01-01"
 LIMIT = 100
