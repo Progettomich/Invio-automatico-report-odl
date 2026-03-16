@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report ODL</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333333; margin: 20px 40px; background-color: #ffffff; }
+        .header-title { color: #0b7a5c; font-size: 28px; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; border-bottom: 2px solid #0b7a5c; padding-bottom: 10px; }
+        .subtitle { font-size: 13px; color: #666666; margin-bottom: 25px; }
+        .cards-container { display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+        .card { background-color: #edf3e0; border-left: 5px solid #0b7a5c; padding: 15px 20px; border-radius: 4px; flex: 1; min-width: 220px; }
+        .card-value { color: #0b7a5c; font-size: 26px; font-weight: bold; margin-bottom: 5px; }
+        .card-label { font-size: 13px; color: #555555; }
+        .section-title { font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #333333; }
+        .chart-placeholder { margin-bottom: 40px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 13px; }
+        th { background-color: #0b7a5c; color: #ffffff; text-align: left; padding: 10px; font-weight: bold; }
+        td { background-color: #edf3e0; padding: 10px; color: #333333; border-right: 2px solid #ffffff; }
+        td:last-child { border-right: none; }
+        .footer { border-top: 1px solid #e0e0e0; padding-top: 15px; font-size: 12px; color: #999999; }
+    </style>
+</head>
+<body>
+
+    <div class="header-title">
+        <span>📋</span> MICH — Report ODL — {{ nome }}
+    </div>
+    <div class="subtitle">
+        Generato il: {{ data_gen }}
+    </div>
+
+    <div class="cards-container">
+        <div class="card">
+            <div class="card-value">{{ IN_CORSO }}</div>
+            <div class="card-label">ODL in corso</div>
+        </div>
+        <div class="card">
+            <div class="card-value">{{ SOSPESI }}</div>
+            <div class="card-label">ODL Sospesi / In attesa di ricambio</div>
+        </div>
+        <div class="card">
+            <div class="card-value">{{ CHIUSI }}</div>
+            <div class="card-label">ODL Chiusi</div>
+        </div>
+        <div class="card">
+            <div class="card-value">{{ RDI_NON_PRESI }}</div>
+            <div class="card-label">ODL in attesa che sia generato l'ODL</div>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <span>📊</span> Stato ODL
+    </div>
+    <div class="chart-placeholder">
+        <!-- L'immagine generata in base64 da Python verrà inserita qui -->
+        <img src="data:image/png;base64,{{ grafico_base64 }}" alt="Grafico stato ODL" style="max-height: 300px;">
+    </div>
+
+    <div class="section-title">
+        <span>📄</span> Dettaglio Ordini di Lavoro
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID ODL</th>
+                <th>Data ODL</th>
+                <th>Aperto da</th>
+                <th>Stato</th>
+                <th>Descrizione ODL</th>
+                <th>Causa sospensione</th>
+                <th>Descrizione bene</th>
+                <th>Fornitore</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Il ciclo for di Jinja2 che crea le righe dinamicamente -->
+            {% for odl in odl_list %}
+            <tr>
+                <!-- IMPORTANTE: I nomi dopo 'odl.' devono essere ESATTAMENTE i nomi delle colonne del tuo DataFrame -->
+                <td>{{ odl.id_odl }}</td>
+                <td>{{ odl.data_odl }}</td>
+                <td>{{ odl.aperto_da }}</td>
+                <td>{{ odl.stato }}</td>
+                <td>{{ odl.descrizione }}</td>
+                <td>{{ odl.causa_sospensione }}</td>
+                <td>{{ odl.desc_bene }}</td>
+                <td>{{ odl.fornitore }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Report generato automaticamente dal sistema CMMS — Ingegneria Clinica
+    </div>
+
+</body>
+</html>
