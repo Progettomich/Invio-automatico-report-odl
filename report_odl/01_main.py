@@ -29,15 +29,8 @@ def fetch_odl_per_responsabili(
 
     if responsabili is None:
         responsabili = [
-            "Addamo FEDERICO",
-            "PIETRAGALLA CANIO",
-            "URBINA ZABALETA MARIA",
-            "GALIMBERTI CARLO",
-            "RIZZO ALESSANDRO",
-            "GHILARDOTTI GILBERTO",
-            "VALENTINO ANGELO",
+            "Addamo FEDERICO" # Lascia solo lui per fare il test
         ]
-
     risultati = {}
 
     for responsabile in responsabili:
