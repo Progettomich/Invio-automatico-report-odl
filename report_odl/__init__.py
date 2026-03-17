@@ -1,4 +1,4 @@
-from 06_scheduler import schedule_report
+from scheduler import schedule_report
 
 schedule_report()
 

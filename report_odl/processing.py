@@ -1,19 +1,7 @@
 # report_odl/processing.py
 import pandas as pd
 from datetime import datetime
-from m01_main import fetch_odl_per_responsabili
-
-
-# Lista centralizzata dei tecnici (stessa del fetch)
-RESPONSABILI = [
-    "ADDAMO FEDERICO",
-    "PIETRAGALLA CANIO",
-    "URBINA ZABALETA MARIA",
-    "GALIMBERTI CARLO",
-    "RIZZO ALESSANDRO",
-    "GHILARDOTTI GILBERTO",
-    "VALENTINO ANGELO",
-]
+from main import fetch_odl_per_responsabili
 
 COLONNE_OUTPUT = [
     "id_odl",

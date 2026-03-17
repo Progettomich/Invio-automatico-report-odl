@@ -3,11 +3,11 @@
 import schedule  # libreria semplice per scheduling
 import time
 from datetime import datetime
-from report_odl.main import fetch_odl_per_responsabili
-from report_odl.processing import process_data
-from report_odl.html_report import build_html
-from report_odl.email_sender import send_report
-from report_odl.config import TECNICI
+from main import fetch_odl_per_responsabili
+from processing import process_data
+from html_report import build_html_report
+from email_sender import send_report
+from config import TECNICI
 
 def run_weekly_report():
     """
@@ -54,3 +54,9 @@ def schedule_report():
     while True:
         schedule.run_pending()  # controlla se è ora di eseguire qualcosa
         time.sleep(30)         # aspetta 30 secondi per non sovraccaricare la CPU
+
+if __name__ == "__main__":
+    print("Avvio manuale per TEST immediato...")
+    # Invece di chiamare schedule_report(), chiamo direttamente la funzione
+    run_weekly_report() 
+
