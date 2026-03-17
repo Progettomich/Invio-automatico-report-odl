@@ -1,6 +1,6 @@
 import requests
 # IMPORTANTE: Importa il dizionario dal tuo file di configurazione
-from report_odl.config import TECNICI
+from config import TECNICI
 
 def fetch_odl_per_responsabili(
     base_url="http://10.38.169.149:3500/api/v1/zMaintenance/REPORT/ODL",

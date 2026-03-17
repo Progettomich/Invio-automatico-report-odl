@@ -1,7 +1,7 @@
 # report_odl/email_sender.py
 import requests
 import logging
-from report_odl.config import CC_EMAILS, GMAIL_MITTENTE, GMAIL_APP_PASSWORD
+from config import CC_EMAILS, GMAIL_MITTENTE, GMAIL_APP_PASSWORD
 
 # Configurazione logging base
 logging.basicConfig(
