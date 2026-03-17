@@ -19,7 +19,7 @@ COLONNE_OUTPUT = [
     "id_odl",
     "stato_odl",
     "data_odl",
-    "descrizioni_odl",
+    "descrizione_odl",
     "causa_sospensione",
     "descrizione_bene",
     "fornitore",
