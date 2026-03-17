@@ -16,7 +16,7 @@ def run_weekly_report():
     """
 
     # 1️⃣ Scarica tutti gli ODL tramite la funzione API
-    df_all = fetch_tutti_odl_tecnici
+    df_all = fetch_odl_per_responsabili
 
     # 2️⃣ Elabora i dati e ritorna un dizionario {tecnico: df_tecnico}
     tecnici_dict = process_data(df_all)
@@ -24,7 +24,7 @@ def run_weekly_report():
     # 3️⃣ Per ciascun tecnico costruisce e invia il report
     for tecnico, df_tecnico in tecnici_dict.items():
         # Genera il corpo HTML del report
-        html_body = build_html(tecnico, df_tecnico)
+        html_body = build_html_report(tecnico, df_tecnico)
 
         # Recupera l'email destinazione dal config (TECNICI è un dict: {nome: email})
         email_dest = TECNICI.get(tecnico, "")
