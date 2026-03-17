@@ -3,17 +3,19 @@
 import schedule  # libreria semplice per scheduling
 import time
 from datetime import datetime
-from main import fetch_odl_per_responsabili
+from api_request import fetch_odl_per_responsabili
 from processing import process_data
 from html_report import build_html_report
 from email_sender import send_report
 from config import TECNICI
+
 
 def run_weekly_report():
     """
     Funzione principale che viene eseguita dal scheduler.
     Scarica i dati ODL, elabora i report per ciascun tecnico e invia le email.
     """
+    print("Esecuzione funzione Run Weekly Report iniziata.")
 
     # 1️⃣ Scarica tutti gli ODL tramite la funzione API
     df_all = fetch_odl_per_responsabili

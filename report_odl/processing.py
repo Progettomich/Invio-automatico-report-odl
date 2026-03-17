@@ -1,7 +1,7 @@
 # report_odl/processing.py
 import pandas as pd
 from datetime import datetime
-from main import fetch_odl_per_responsabili
+from api_request import fetch_odl_per_responsabili
 
 COLONNE_OUTPUT = [
     "id_odl",
