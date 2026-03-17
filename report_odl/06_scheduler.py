@@ -54,3 +54,9 @@ def schedule_report():
     while True:
         schedule.run_pending()  # controlla se è ora di eseguire qualcosa
         time.sleep(30)         # aspetta 30 secondi per non sovraccaricare la CPU
+
+if __name__ == "__main__":
+    print("Avvio manuale per TEST immediato...")
+    # Invece di chiamare schedule_report(), chiamo direttamente la funzione
+    run_weekly_report() 
+
