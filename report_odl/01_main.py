@@ -1,4 +1,6 @@
 import requests
+# IMPORTANTE: Importa il dizionario dal tuo file di configurazione
+from report_odl.config import TECNICI
 
 def fetch_odl_per_responsabili(
     base_url="http://10.38.169.149:3500/api/v1/zMaintenance/REPORT/ODL",
@@ -10,30 +12,16 @@ def fetch_odl_per_responsabili(
     page=1,
     responsabili=None
 ):
-    """
-    Recupera i report ODL per una lista di responsabili/tecnici.
-
-    Parametri:
-        base_url  : URL dell'API
-        user      : username per l'autenticazione
-        password  : password per l'autenticazione
-        stati     : stati degli ODL da filtrare (stringa separata da virgole)
-        date_from : data di inizio filtro (formato YYYY-MM-DD)
-        limit     : numero massimo di record per pagina
-        page      : numero di pagina
-        responsabili : lista di nomi tecnici (se None usa la lista di default)
-
-    Ritorna:
-        dict con i risultati per ogni tecnico { nome_tecnico: data_risposta }
-    """
-
+    
+    # SE NON PASSI NESSUNA LISTA, PRENDE AUTOMATICAMENTE I NOMI DAL CONFIG.PY!
     if responsabili is None:
-        responsabili = [
-            "Addamo FEDERICO" # Lascia solo lui per fare il test
-        ]
+        # list(TECNICI.keys()) prende solo i nomi ["Addamo FEDERICO", "PIETRAGALLA..."]
+        responsabili = list(TECNICI.keys()) 
+
     risultati = {}
 
     for responsabile in responsabili:
+        # ... [IL RESTO DEL TUO CODICE RIMANE IDENTICO A PRIMA] ...
         params = {
             "limit": limit,
             "page": page,
