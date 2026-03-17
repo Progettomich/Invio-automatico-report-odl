@@ -3,7 +3,7 @@
 import schedule  # libreria semplice per scheduling
 import time
 from datetime import datetime
-from report_odl.01_main import fetch_odl_per_responsabili
+from report_odl.main import fetch_odl_per_responsabili
 from report_odl.processing import process_data
 from report_odl.html_report import build_html
 from report_odl.email_sender import send_report
