@@ -5,9 +5,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Configurazione API ---
-API_BASE = os.getenv("API_BASE")
 API_USER = os.getenv("API_USER")
 API_PASS = os.getenv("API_PASS")
+
+# Indirizzo IP del computer su cui gira l'API da variabili .env
+API_BASE = os.getenv("API_BASE")
+
+# URL completo dell'api di base
+API_ENDPOINT = f"{API_BASE}/api/v1/zMaintenance"
+
+# Endpoint specifici della API
+RDI_ENDPOINT = "/rdi"
+ODL_REPORT_ENDPOINT = "/report/odl"
+
 DATE_FROM = "2026-01-01"
 
 # --- Lista tecnici e relative email ---

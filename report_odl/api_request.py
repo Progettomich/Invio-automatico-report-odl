@@ -1,10 +1,9 @@
 import requests
 # IMPORTANTE: Importa il dizionario dal tuo file di configurazione
-from config import TECNICI
+from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI
 
 # CHIAMATA API PER ODL
 def fetch_odl_per_responsabili(
-    base_url = "http://10.38.169.149:3500/api/v1/zMaintenance/REPORT/ODL",
     user = "YOURUSER",
     password = "YOURPASSWORD",
     stati = "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
@@ -15,6 +14,8 @@ def fetch_odl_per_responsabili(
 ):
     
     print("Inizio fetch_odl_per_responsabili")
+
+    endpoint_url = f"{API_ENDPOINT}{ODL_REPORT_ENDPOINT}"
     
     # SE NON PASSI NESSUNA LISTA, PRENDE AUTOMATICAMENTE I NOMI DAL CONFIG.PY!
     if responsabili is None:
@@ -38,7 +39,7 @@ def fetch_odl_per_responsabili(
         print(f"Richiesta per tecnico: {responsabile}")
         try:
             response = requests.get(
-    base_url,
+    endpoint_url,
     params=params,
     timeout=10,
     auth=(user, password)
@@ -63,19 +64,30 @@ def fetch_odl_per_responsabili(
 
 
 # CHIAMATA API PER RDI asc
-def fetch_rdi_asc(
-    base_url = "http://10.38.169.149:3500/api/v1/zMaintenance/rdi"
+def fetch_rdi(
     user = "YOURUSER",
     password = "YOURPASSWORD", 
     limit = 10,
     page = 1,
     stato = "CREATA",
     orderBy = "asc"
-):
-   
-    print(f"Scaricando RDI da: {url_completo}")
+):   
+
+    endpoint_url = f"{API_ENDPOINT}{RDI_ENDPOINT}"
+
+    print(f"Scaricando RDI da: {endpoint_url}")
+
+    params = {
+            "limit": limit,
+            "page": page,
+            "stato": stato,
+            "orderBy": orderBy,
+            "user": user,
+            "password" : password
+        }
+    
     try:
-        response = requests.get(url_completo, timeout=10)
+        response = requests.get(endpoint_url, params=params, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
@@ -96,38 +108,3 @@ def fetch_rdi_asc(
         print(f"Errore di rete/chiamata API RDI: {e}")
         return []
 
-
-# CHIAMATA PER RDI desc
-
-def fetch_rdi_desc(
-    base_url = "http://10.38.169.149:3500/api/v1/zMaintenance/rdi"
-    user = "YOURUSER",
-    password = "YOURPASSWORD", 
-    limit = 10,
-    page = 1,
-    stato = "CREATA",
-    orderBy = "desc"
-):
- 
-    print(f"Scaricando RDI da: {url_completo}")
-    try:
-        response = requests.get(url_completo, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            
-            # Estraiamo solo la chiave "recordset"
-            if isinstance(data, dict) and "recordset" in data:
-                recordset = data["recordset"]
-                print(f"-> Trovati {len(recordset)} record RDI.")
-                return recordset
-            else:
-                print("-> Nessun 'recordset' trovato nel JSON. L'API potrebbe aver cambiato formato.")
-                return []
-        else:
-            print(f"Errore HTTP RDI: {response.status_code} - {response.text}")
-            return []
-            
-    except requests.exceptions.RequestException as e:
-        print(f"Errore di rete/chiamata API RDI: {e}")
-        return []

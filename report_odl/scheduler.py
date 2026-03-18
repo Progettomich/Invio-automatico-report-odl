@@ -3,11 +3,12 @@
 import schedule  # libreria semplice per scheduling
 import time
 from datetime import datetime
-from api_request import fetch_odl_per_responsabili
+from api_request import fetch_odl_per_responsabili, fetch_rdi
 from processing import process_data
 from html_report import build_html_report
 from email_sender import send_report
 from config import TECNICI
+from config import API_ENDPOINT, API_USER, API_PASS, ODL_REPORT_ENDPOINT, RDI_ENDPOINT
 
 
 def run_weekly_report():
@@ -18,7 +19,10 @@ def run_weekly_report():
     print("Esecuzione funzione Run Weekly Report iniziata.")
 
     # 1️⃣ Scarica tutti gli ODL tramite la funzione API
-    df_all = fetch_odl_per_responsabili
+    df_all = fetch_odl_per_responsabili(API_USER, API_PASS)
+
+    rdi_asc = fetch_rdi(API_USER, API_PASS, 10, 1, "CREATA", "asc")
+    rdi_desc = fetch_rdi(API_USER, API_PASS, 10, 1, "CREATA", "desc")
 
     # 2️⃣ Elabora i dati e ritorna un dizionario {tecnico: df_tecnico}
     tecnici_dict = process_data(df_all)
