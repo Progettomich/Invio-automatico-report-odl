@@ -76,7 +76,7 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     )
     return fig
 
-
+# Funzione per generare l'immagine dei grafici
 
 def grafico_to_base64(fig):
     """Converte qualsiasi grafico Plotly in base64 per HTML"""
