@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report ODL</title>
+    <title>Report ODL e RDI</title>
     <style>
         body { font-family: Arial, sans-serif; color: #333333; margin: 20px 40px; background-color: #ffffff; }
         .header-title { color: #0b7a5c; font-size: 28px; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; border-bottom: 2px solid #0b7a5c; padding-bottom: 10px; }
@@ -12,24 +12,26 @@
         .card { background-color: #edf3e0; border-left: 5px solid #0b7a5c; padding: 15px 20px; border-radius: 4px; flex: 1; min-width: 220px; }
         .card-value { color: #0b7a5c; font-size: 26px; font-weight: bold; margin-bottom: 5px; }
         .card-label { font-size: 13px; color: #555555; }
-        .section-title { font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #333333; }
-        .chart-placeholder { margin-bottom: 40px; text-align: left; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 13px; }
+        .section-title { font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #333333; margin-top: 30px;}
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
         th { background-color: #0b7a5c; color: #ffffff; text-align: left; padding: 10px; font-weight: bold; }
         td { background-color: #edf3e0; padding: 10px; color: #333333; border-right: 2px solid #ffffff; }
         td:last-child { border-right: none; }
-        .footer { border-top: 1px solid #e0e0e0; padding-top: 15px; font-size: 12px; color: #999999; }
+        .footer { border-top: 1px solid #e0e0e0; padding-top: 15px; font-size: 12px; color: #999999; margin-top: 50px; }
+        .chart-container { display: flex; gap: 20px; justify-content: space-between; margin-bottom: 40px; }
+        .chart-box { flex: 1; text-align: center; background-color: #fcfcfc; padding: 10px; border-radius: 8px; border: 1px solid #eeeeee; }
     </style>
 </head>
 <body>
 
     <div class="header-title">
-        <span>📋</span> MICH — Report ODL — {{ nome }}
+        <span>📋</span> MICH — Report ODL e RDI — {{ nome }}
     </div>
     <div class="subtitle">
         Generato il: {{ data_gen }}
     </div>
 
+    <!-- KPI CARDS -->
     <div class="cards-container">
         <div class="card">
             <div class="card-value">{{ IN_CORSO }}</div>
@@ -37,7 +39,7 @@
         </div>
         <div class="card">
             <div class="card-value">{{ SOSPESI }}</div>
-            <div class="card-label">ODL Sospesi / In attesa di ricambio</div>
+            <div class="card-label">ODL Sospesi / In attesa ricambio</div>
         </div>
         <div class="card">
             <div class="card-value">{{ CHIUSI }}</div>
@@ -45,28 +47,35 @@
         </div>
         <div class="card">
             <div class="card-value">{{ RDI_NON_PRESI }}</div>
-            <div class="card-label">ODL in attesa che sia generato l'ODL</div>
+            <div class="card-label">RDI in attesa di presa in carico</div>
         </div>
     </div>
 
+    <!-- SEZIONE GRAFICI AFFIANCATI -->
     <div class="section-title">
-        <span>📊</span> Stato ODL
+        <span>📊</span> Analisi Visiva ODL e RDI
     </div>
-    <div class="chart-placeholder">
-        <!-- L'immagine generata in base64 da Python verrà inserita qui -->
-        <img src="{{ grafico_base64 }}" alt="Grafico stato ODL" style="max-height: 300px;">
+    <div class="chart-container">
+        <!-- GRAFICO A BARRE (ODL Personali) -->
+        <div class="chart-box">
+            <img src="{{ grafico_base64_odl }}" alt="Grafico stato ODL" style="max-width: 100%; height: auto;">
+        </div>
+        <!-- GRAFICO A TORTA (RDI Globali) -->
+        <div class="chart-box">
+            <img src="{{ grafico_base64_rdi }}" alt="Grafico torta RDI" style="max-width: 100%; height: auto;">
+        </div>
     </div>
 
+    <!-- TABELLA 1: ODL PERSONALI -->
     <div class="section-title">
-        <span>📄</span> Dettaglio Ordini di Lavoro
+        <span>📄</span> Dettaglio Ordini di Lavoro (ODL)
     </div>
-
     <table>
         <thead>
             <tr>
                 <th>ID ODL</th>
                 <th>Data ODL</th>
-                <th>Aperto da</th>
+                <th>Giorni Trascorsi</th>
                 <th>Stato</th>
                 <th>Descrizione ODL</th>
                 <th>Causa sospensione</th>
@@ -75,10 +84,8 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Il ciclo for di Jinja2 che crea le righe dinamicamente -->
             {% for odl in odl_list %}
             <tr>
-                <!-- IMPORTANTE: I nomi dopo 'odl.' devono essere ESATTAMENTE i nomi delle colonne del tuo DataFrame -->
                 <td>{{ odl.id_odl }}</td>
                 <td>{{ odl.data_odl }}</td>
                 <td>{{ odl.giorni_trascorsi }}</td>
@@ -87,6 +94,64 @@
                 <td>{{ odl.causa_sospensione }}</td>
                 <td>{{ odl.descrizione_bene }}</td>
                 <td>{{ odl.fornitore }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- TABELLA 2: RDI DESC (Più recenti) -->
+    <div class="section-title">
+        <span>📥</span> RDI Non Presi (Più recenti - Ultimi 10)
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>N RDI</th>
+                <th>DATA RDI</th>
+                <th>DESCRIZIONE RDI</th>
+                <th>DESCRIZIONE BENE</th>
+                <th>ICH</th>
+                <th>REPARTO O MEDICALCARE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rdi in rdi_desc_list %}
+            <tr>
+                <td>{{ rdi.N_RDI }}</td>
+                <td>{{ rdi.DATA_RDI }}</td>
+                <td>{{ rdi.DESCRIZIONE_RDI }}</td>
+                <td>{{ rdi.DESC_BENE }}</td>
+                <td>{{ rdi.ICH }}</td>
+                <td>{{ rdi.REPARTO }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- TABELLA 3: RDI ASC (Più vecchi) -->
+    <div class="section-title">
+        <span>📤</span> RDI Non Presi (Più vecchi - Primi 10)
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>N RDI</th>
+                <th>DATA RDI</th>
+                <th>DESCRIZIONE RDI</th>
+                <th>DESCRIZIONE BENE</th>
+                <th>ICH</th>
+                <th>REPARTO O MEDICALCARE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rdi in rdi_asc_list %}
+            <tr>
+                <td>{{ rdi.N_RDI }}</td>
+                <td>{{ rdi.DATA_RDI }}</td>
+                <td>{{ rdi.DESCRIZIONE_RDI }}</td>
+                <td>{{ rdi.DESC_BENE }}</td>
+                <td>{{ rdi.ICH }}</td>
+                <td>{{ rdi.REPARTO }}</td>
             </tr>
             {% endfor %}
         </tbody>
