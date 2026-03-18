@@ -11,6 +11,8 @@ COLOR_MAP = {
 }
 ORDINE_STATI = ["CONCLUSO", "SOSPESO", "IN CORSO", "DA FARE"]
 
+# Funzione per generare il grafico a barre per gli odl
+
 def genera_grafico_plotly(df):
     """Genera grafico Plotly ordinato per ORDINE_STATI"""
     if "STATO" not in df.columns:
@@ -41,9 +43,43 @@ def genera_grafico_plotly(df):
     )
     return fig
 
+# Funzione per generare il grafico a torta per i reparti
+
+def genera_grafico_torta_rdi(df_rdi_desc):
+    """Genera grafico a torta per la distribuzione RDI per reparto."""
+    colonna_reparto = "REPARTO" # <-- Cambia se nel JSON si chiama diversamente
+    
+    if df_rdi_desc.empty or colonna_reparto not in df_rdi_desc.columns:
+        fig = go.Figure()
+        fig.update_layout(title="Nessun RDI disponibile per il grafico a torta", width=800, height=400)
+        return fig
+    
+    reparti_counts = df_rdi_desc[colonna_reparto].fillna("Sconosciuto").value_counts()
+    labels = reparti_counts.index.tolist()
+    values = reparti_counts.values.tolist()
+    
+    fig = go.Figure(data=[
+        go.Pie(
+            labels=labels, 
+            values=values,
+            textinfo='percent', # Mostra solo la percentuale nella fetta
+            insidetextorientation='radial',
+            marker=dict(line=dict(color='#ffffff', width=2))
+        )
+    ])
+    
+    fig.update_layout(
+        title="Distribuzione RDI Non Presi per Reparto",
+        width=800, height=400,
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
+    )
+    return fig
+
+
+
 def grafico_to_base64(fig):
-    """Converte grafico Plotly in base64 per HTML"""
-    img_bytes = fig.to_image(format="png", width=800, height=500)
+    """Converte qualsiasi grafico Plotly in base64 per HTML"""
+    img_bytes = fig.to_image(format="png", width=800, height=400)
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
     return f"data:image/png;base64,{img_base64}"
-
