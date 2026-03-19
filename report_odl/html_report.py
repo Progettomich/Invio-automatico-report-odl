@@ -11,7 +11,7 @@ def build_html_report(tecnico: str, df_t: pd.DataFrame, df_rdi_desc: pd.DataFram
     # 1. Calcola i totali per le card verdi in alto
     # Assicurati che 'stato' sia il nome corretto della colonna nel tuo DataFrame
     # Se la colonna si chiama diversamente (es. 'STATO_ODL'), cambialo qui sotto.
-    colonna_stato = 'stato' 
+    colonna_stato = 'STATO_ODL' 
     
     if colonna_stato in df_t.columns:
         conteggi_stato = df_t[colonna_stato].value_counts().to_dict()
