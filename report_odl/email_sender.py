@@ -24,6 +24,8 @@ def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL
         bool: True se l'invio è andato a buon fine, False altrimenti
     """
 
+    email_endpoint_url = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}"
+
     # 1️⃣ Corpo della richiesta POST (ad esempio a un endpoint interno di invio email)
     payload = {
         "to": email_destinatario,         # destinatario principale
@@ -36,7 +38,7 @@ def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL
     try:
         # 2️⃣ Esempio invio via API POST (sostituire URL_API_INVIOMAIL con l'endpoint reale)
         API_ENDPOINT = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}"
-        response = requests.post(API_ENDPOINT, json=payload, timeout=10)
+        response = requests.post(email_endpoint_url, json=payload, timeout=10)
         response.raise_for_status()  # genera eccezione se codice HTTP != 200
 
         logging.info(f"Report inviato correttamente a {nome_tecnico} ({email_destinatario})")
