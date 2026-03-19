@@ -1,7 +1,6 @@
 # report_odl/processing.py
 import pandas as pd
 from datetime import datetime
-from api_request import fetch_odl_per_responsabili
 
 COLONNE_OUTPUT = [
     "id_odl",
@@ -110,15 +109,3 @@ def process_rdi(dati_rdi: list) -> pd.DataFrame:
     
     return df
 
-
-######Parte da eliminare una volta verificato che il processo funziona correttamente######
-# 1. Chiamo il fetch per ottenere i dati grezzi
-dati_grezzi = fetch_odl_per_responsabili()
-
-# 2. Processo i dati
-dati_processati = process_data(dati_grezzi)
-
-# 3. Stampo i risultati per verificare
-for tecnico, df in dati_processati.items():
-    print(f"\n=== {tecnico} ===")
-    print(df)

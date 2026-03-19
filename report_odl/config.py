@@ -17,6 +17,7 @@ API_ENDPOINT = f"{API_BASE}/api/v1/zMaintenance"
 # Endpoint specifici della API
 RDI_ENDPOINT = "/rdi"
 ODL_REPORT_ENDPOINT = "/report/odl"
+MAIL_SEND_ENDPOINT = "/"
 
 DATE_FROM = "2026-01-01"
 

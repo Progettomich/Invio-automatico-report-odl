@@ -12,6 +12,11 @@ def fetch_odl_per_responsabili(
     page = 1,
     responsabili = None
 ):
+    """
+    Scarica gli ODL per ciascun responsabile dalla API.
+    User e password vengono passati come query params (non come HTTP Basic Auth).
+    Gli stati vengono passati come stringa unica con virgole reali nell'URL.
+    """
     
     print("Inizio fetch_odl_per_responsabili")
 
@@ -37,13 +42,14 @@ def fetch_odl_per_responsabili(
         }
 
         print(f"Richiesta per tecnico: {responsabile}")
+
         try:
             response = requests.get(
-    endpoint_url,
-    params=params,
-    timeout=10,
-    auth=(user, password)
-)
+            endpoint_url,
+            params=params,
+            timeout=10,
+            auth=(user, password)
+        )
             print("URL chiamata:", response.url)
 
             if response.status_code == 200:
