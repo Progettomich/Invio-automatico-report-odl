@@ -1,7 +1,6 @@
 # report_odl/processing.py
 import pandas as pd
 from datetime import datetime
-from main import fetch_odl_per_responsabili
 
 COLONNE_OUTPUT = [
     "id_odl",
@@ -12,6 +11,16 @@ COLONNE_OUTPUT = [
     "descrizione_bene",
     "fornitore",
     "giorni_trascorsi",
+]
+
+COLONNE_OUTPUT_RDI = [
+    "N_RDI",
+    "DATA_RDI",
+    "DESCRIZIONE_RDI",
+    "APERTA_DA",         
+    "DESCRIZIONE_BENE",
+    "ICH",
+    "REPARTO"
 ]
 
 
@@ -66,15 +75,37 @@ def process_data(dati_grezzi: dict) -> dict:
 
     return risultati 
 
+def process_rdi(dati_rdi: list) -> pd.DataFrame:
+    
+    # Riceve la lista globale degli RDI e la pulisce,
+    # restituendo un DataFrame formattato per le tabelle HTML.
+    
+    if not dati_rdi or not isinstance(dati_rdi, list):
+        return pd.DataFrame(columns=COLONNE_OUTPUT_RDI)
+        
+    df = pd.DataFrame(dati_rdi)
+    
+    # 1. Rinomina le chiavi JSON dell'API nelle chiavi che si aspetta il tuo HTML
+   
+    mappa_rinomina = {
+        "N_RDI": "N_RDI",            
+        "DATA_RDI": "DATA_RDI",  
+        "DESCRIZIONE_RDI": "DESCRIZIONE_RDI",
+        "APERTA DA": "APERTA_DA",
+        "DESCRIZIONE_BENE": "DESCRIZIONE_BENE",           
+        "N_INVETARIO": "ICH",           
+        "REPARTO": "REPARTO"           # Questa è la colonna usata anche dal grafico a torta
+    }
+    
+    # Rinomina le colonne solo se esistono nel DataFrame grezzo
+    df = df.rename(columns=mappa_rinomina)
 
-######Parte da eliminare una volta verificato che il processo funziona correttamente######
-# 1. Chiamo il fetch per ottenere i dati grezzi
-dati_grezzi = fetch_odl_per_responsabili()
+    # 3. Mantieni solo le colonne che servono all'HTML
+    colonne_presenti = [c for c in COLONNE_OUTPUT_RDI if c in df.columns]
+    df = df[colonne_presenti]
+    
+    # Riempi i valori vuoti (NaN) con una stringa vuota o un trattino
+    df = df.fillna(" ")
+    
+    return df
 
-# 2. Processo i dati
-dati_processati = process_data(dati_grezzi)
-
-# 3. Stampo i risultati per verificare
-for tecnico, df in dati_processati.items():
-    print(f"\n=== {tecnico} ===")
-    print(df)
