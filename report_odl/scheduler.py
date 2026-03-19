@@ -66,7 +66,7 @@ def schedule_report():
     # schedule.every().monday.at("08:00").do(run_weekly_report)
     # Questo dice: ogni lunedì alle 08:00 esegui la funzione run_weekly_report()
 
-    schedule.every().minute.do(run_weekly_report)  # <-- Per test, esegue ogni minuto
+    schedule.every(1).minutes.do(run_weekly_report)
 
     print(f"[{datetime.now()}] Scheduler avviato: report automatici ogni Lunedì alle 08:00")
 
@@ -79,6 +79,9 @@ def schedule_report():
 
 if __name__ == "__main__":
     print("Avvio manuale per TEST immediato...")
+
     # Invece di chiamare schedule_report(), chiamo direttamente la funzione
-    run_weekly_report() 
+    # run_weekly_report() 
+
+    schedule_report()
 
