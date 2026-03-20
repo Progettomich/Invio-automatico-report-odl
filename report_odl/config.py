@@ -33,6 +33,6 @@ TECNICI = {
 }
 
 # --- Configurazione invio email ---
-GMAIL_MITTENTE = "tuo.account@gmail.com"
-GMAIL_APP_PASSWORD = "xxxx xxxx xxxx xxxx"
+GMAIL_MITTENTE = "progetto.humanitasits@gmail.com"
+GMAIL_APP_PASSWORD = "ICH16712!"
 CC_EMAILS = "sabrina.tapiabarzola@humanitas.it, federico.giacchibonetta@humanitas.it"
