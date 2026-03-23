@@ -105,7 +105,7 @@ def process_rdi(dati_rdi: list) -> pd.DataFrame:
     df = df[colonne_presenti]
     
     # Riempi i valori vuoti (NaN) con una stringa vuota o un trattino
-    df = df.fillna(" ")
+    df = df.fillna("")
     
     return df
 

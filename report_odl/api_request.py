@@ -1,11 +1,11 @@
 import requests
 
-from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI
+from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS
 
 # CHIAMATA API PER ODL
 def fetch_odl_per_responsabili(
-    user = "YOURUSER",
-    password = "YOURPASSWORD",
+    user = None,
+    password = None,
     stati = "IN CORSO,SOSPESO,DA FARE,CONCLUSO",
     date_from = "2026-01-01",
     limit = 100,
@@ -17,7 +17,11 @@ def fetch_odl_per_responsabili(
     User e password vengono passati come query params.
     Gli stati vengono passati come stringa unica con virgole reali nell'URL.
     """
-    
+    if user is None:
+        user = API_USER
+    if password is None:
+        password = API_PASS
+
     print("Inizio fetch_odl_per_responsabili")
 
     endpoint_url = f"{API_ENDPOINT}{ODL_REPORT_ENDPOINT}"
@@ -34,6 +38,8 @@ def fetch_odl_per_responsabili(
 
         # ... [IL RESTO DEL TUO CODICE RIMANE IDENTICO A PRIMA] ...
         params = {
+            "user": user,
+            "password": password,
             "limit": limit,
             "page": page,
             "stato": stati,
@@ -54,7 +60,7 @@ def fetch_odl_per_responsabili(
 
             if response.status_code == 200:
                 data = response.json()
-                print("Numero record ricevuti:", len(data) if isinstance(data, list) else "non è una lista")
+                print("Numero record ricevuti:", len(data) if isinstance(data, list) else f"risposta ricevuta (formato: {type(data).__name__})")
                 risultati[responsabile] = data
             else:
                 print("Errore HTTP ODL:", response.status_code, response.text)
@@ -71,19 +77,26 @@ def fetch_odl_per_responsabili(
 
 # CHIAMATA API PER RDI asc
 def fetch_rdi(
-    user = "YOURUSER",
-    password = "YOURPASSWORD", 
+    user = None,
+    password = None, 
     limit = 10,
     page = 1,
     stato = "CREATA",
     orderBy = "asc"
 ):   
 
+    if user is None:
+        user = API_USER
+    if password is None:
+        password = API_PASS
+
     endpoint_url = f"{API_ENDPOINT}{RDI_ENDPOINT}"
 
     print(f"Scaricando RDI da: {endpoint_url}")
 
     params = {
+            "user": user,
+            "password": password,
             "limit": limit,
             "page": page,
             "stato": stato,
