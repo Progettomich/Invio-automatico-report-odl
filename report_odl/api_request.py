@@ -1,3 +1,4 @@
+
 # Libreria per effettuare chiamate HTTP verso le API
 import requests
 
@@ -77,7 +78,7 @@ def fetch_odl_per_responsabili(
                 print("Numero record ricevuti:", len(data) if isinstance(data, list)
                       else f"risposta ricevuta (formato: {type(data).__name__})")
                 # Salva i dati nel dizionario dei risultati con il nome del tecnico come chiave
-                risultati[responsabile] = data
+                risultati[responsabile] = data["data"]["recordset"] if isinstance(data, dict) and "data" in data and "recordset" in data["data"] else []
             else:
                 # In caso di errore HTTP stampa il codice e il messaggio di errore
                 print("Errore HTTP:", response.status_code, response.text)

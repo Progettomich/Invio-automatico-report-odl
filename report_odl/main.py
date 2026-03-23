@@ -23,14 +23,3 @@ def main():
 # il file viene avviato direttamente, non quando viene importato da un altro file
 if __name__ == "__main__":
     main()
-
-
-"""
-Modulo report_odl
-Contiene tutti i moduli per gestire:
-- fetch dei dati ODL        → api_request.py
-- elaborazione e KPI        → processing.py
-- generazione report HTML   → html_report.py
-- invio email               → email_sender.py
-- scheduling automatico     → scheduler.py
-"""

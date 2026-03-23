@@ -5,7 +5,7 @@ import requests
 import logging
 
 # Importazione delle costanti di configurazione per email e API
-from config import CC_EMAILS, GMAIL_MITTENTE, GMAIL_APP_PASSWORD, MAIL_SEND_ENDPOINT, API_ENDPOINT
+from config import CC_EMAILS, MAIL_SEND_ENDPOINT, API_ENDPOINT, API_USER, API_PASS
 
 
 # Configurazione del sistema di logging:
@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 
 
-def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL settimanale"):
+def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="Report ODL settimanale"):
     """
     Invia il report HTML al tecnico tramite richiesta POST all'API o via email SMTP.
     
@@ -34,31 +34,34 @@ def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL
     """
 
     # Costruisce l'URL completo dell'endpoint per l'invio email
-    email_endpoint_url = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}"
+    email_endpoint_url = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}?user={API_USER}&password={API_PASS}"
 
     # Costruisce il corpo della richiesta POST con tutti i dati necessari per l'invio
     payload = {
         "to": email_destinatario,  # destinatario principale: email del tecnico
-        "cc": CC_EMAILS,           # indirizzi in copia conoscenza definiti in config.py
+        "cc": email_cc,           # indirizzi in copia conoscenza definiti in config.py
         "subject": subject,        # oggetto della email
         "text": f"Buongiorno {nome_tecnico}, in allegato il report ODL settimanale.",  # testo alternativo per client che non supportano HTML
         "html": html_body          # corpo HTML del report con tabelle e grafici
     }
 
+    print(f"Prepared email. To: {email_destinatario}, CC: {email_cc}, Subject: {subject}")
+
     try:
         # Invia il report tramite chiamata POST all'endpoint email dell'API
         # json=payload converte automaticamente il dizionario in formato JSON
-        API_ENDPOINT = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}"
         response = requests.post(email_endpoint_url, json=payload, timeout=10)
 
         # Se il server risponde con un codice di errore HTTP, genera un'eccezione
         response.raise_for_status()
 
         # Registra nel log il successo dell'invio
+        
         logging.info(f"Report inviato correttamente a {nome_tecnico} ({email_destinatario})")
         return True
 
     except requests.exceptions.RequestException as e:
         # Registra nel log l'errore con i dettagli del tecnico e il messaggio di errore
+        print(f"[{nome_tecnico}] Invio email fallito con errore: {e}")
         logging.error(f"Errore invio report a {nome_tecnico} ({email_destinatario}): {e}")
         return False

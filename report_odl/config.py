@@ -34,23 +34,14 @@ DATE_FROM = "2026-01-01"
 # Dizionario che associa il nome di ogni tecnico alla sua email aziendale
 # Viene usato per filtrare i dati per tecnico e per inviare i report
 TECNICI = {
-    "Addamo Federico":       "f.addamo@humanitas.it",
-    "Urbina Zabaleta Maria": "m.urbinazabaleta@humanitas.it",
-    "Pietragalla Canio":     "c.pietragalla@humanitas.it",
-    "Galimberti Carlo":      "c.galimberti@humanitas.it",
-    "Rizzo Alessandro":      "a.rizzo@humanitas.it",
-    "Ghilardotti Gilberto":  "g.ghilardotti@humanitas.it",
-    "Valentino Angelo":      "a.valentino@humanitas.it"
+    "Addamo Federico":       "federico.addamo@humanitas.it",
+    # "Urbina Zabaleta Maria": "m.urbinazabaleta@humanitas.it",
+    # "Pietragalla Canio":     "c.pietragalla@humanitas.it",
+    # "Galimberti Carlo":      "c.galimberti@humanitas.it",
+    # "Rizzo Alessandro":      "a.rizzo@humanitas.it",
+    # "Ghilardotti Gilberto":  "g.ghilardotti@humanitas.it",
+    # "Valentino Angelo":      "a.valentino@humanitas.it"
 }
-
-
-# --- Configurazione invio email ---
-# Account Gmail da cui vengono inviate le email con i report
-GMAIL_MITTENTE = "progetto.humanitasits@gmail.com"
-
-# App Password di Gmail — necessaria perché Gmail non accetta
-# la password normale per invii tramite codice
-GMAIL_APP_PASSWORD = "*********"
 
 # Indirizzi email in copia conoscenza (CC) per ogni report inviato
 CC_EMAILS = "sabrina.tapiabarzola@humanitas.it, federico.giacchibonetta@humanitas.it"
