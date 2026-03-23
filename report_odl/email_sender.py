@@ -5,7 +5,7 @@ import requests
 import logging
 
 # Importazione delle costanti di configurazione per email e API
-from config import CC_EMAILS, MAIL_SEND_ENDPOINT, API_ENDPOINT
+from config import CC_EMAILS, MAIL_SEND_ENDPOINT, API_ENDPOINT, API_USER, API_PASS
 
 
 # Configurazione del sistema di logging:
@@ -34,7 +34,7 @@ def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="
     """
 
     # Costruisce l'URL completo dell'endpoint per l'invio email
-    email_endpoint_url = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}"
+    email_endpoint_url = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}?user={API_USER}&password={API_PASS}"
 
     # Costruisce il corpo della richiesta POST con tutti i dati necessari per l'invio
     payload = {
@@ -45,6 +45,8 @@ def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="
         "html": html_body          # corpo HTML del report con tabelle e grafici
     }
 
+    print(f"Prepared email. To: {email_destinatario}, CC: {email_cc}, Subject: {subject}")
+
     try:
         # Invia il report tramite chiamata POST all'endpoint email dell'API
         # json=payload converte automaticamente il dizionario in formato JSON
@@ -54,10 +56,12 @@ def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="
         response.raise_for_status()
 
         # Registra nel log il successo dell'invio
+        
         logging.info(f"Report inviato correttamente a {nome_tecnico} ({email_destinatario})")
         return True
 
     except requests.exceptions.RequestException as e:
         # Registra nel log l'errore con i dettagli del tecnico e il messaggio di errore
+        print(f"[{nome_tecnico}] Invio email fallito con errore: {e}")
         logging.error(f"Errore invio report a {nome_tecnico} ({email_destinatario}): {e}")
         return False

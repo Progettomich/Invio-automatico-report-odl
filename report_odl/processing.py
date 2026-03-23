@@ -7,14 +7,16 @@ from datetime import datetime
 # Elenco delle colonne da mantenere nel DataFrame finale degli ODL
 # Le colonne non presenti in questa lista vengono scartate
 COLONNE_OUTPUT = [
-    "id_odl",           # identificativo univoco dell'ODL
-    "stato_odl",        # stato corrente (IN CORSO, SOSPESO, ecc.)
-    "data_odl",         # data di apertura dell'ODL
-    "descrizione_odl",  # descrizione del lavoro da fare
-    "causa_sospensione", # motivo della sospensione (se presente)
-    "descrizione_bene", # descrizione del bene su cui si lavora
-    "fornitore",        # fornitore coinvolto
-    "giorni_trascorsi", # giorni trascorsi dall'apertura (calcolato)
+    "N_RDI",            # identificativo univoco dell'RDI
+    "N_ODL",            # identificativo univoco dell'ODL
+    "STATO_ODL",        # stato corrente (IN CORSO, SOSPESO, ecc.)
+    "DATA_ODL",         # data di apertura dell'ODL
+    "DESCRIZIONE_ODL",  # descrizione del lavoro da fare
+    "CAUSA_SOSPENSIONE", # motivo della sospensione (se presente)
+    "DESCRIZIONE_BENE", # descrizione del bene su cui si lavora
+    "FORNITORE_APPARECCHIATURA",        # fornitore coinvolto
+    "GIORNI_TRASCORSI", # giorni trascorsi dall'apertura (calcolato)
+    "RESPONSABILE",     # nome responsabile
 ]
 
 # Elenco delle colonne da mantenere nel DataFrame finale delle RDI
@@ -55,28 +57,20 @@ def process_data(dati_grezzi: dict) -> dict:
 
         # --- NORMALIZZAZIONE COLONNE ---
         # Se la colonna 'tecnico' non esiste, la crea vuota per evitare errori
-        if 'tecnico' not in df.columns:
-            df['tecnico'] = ''
+        if 'RESPONSABILE' not in df.columns:
+            df['RESPONSABILE'] = ''
 
         # Se la colonna 'data_odl' non esiste, la crea con valori nulli
-        if 'data_odl' not in df.columns:
-            df['data_odl'] = pd.NaT
+        if 'DATA_ODL' not in df.columns:
+            df['DATA_ODL'] = pd.NaT
 
         # Converte la colonna data in formato datetime
         # errors='coerce' trasforma i valori non validi in NaT invece di dare errore
-        df['data_odl'] = pd.to_datetime(df['data_odl'], errors='coerce')
+        df['DATA_ODL'] = pd.to_datetime(df['DATA_ODL'], errors='coerce')
 
         # Calcola i giorni trascorsi dall'apertura dell'ODL ad oggi
         oggi = pd.Timestamp(datetime.now().date())
-        df['giorni_trascorsi'] = (oggi - df['data_odl']).dt.days
-
-        # --- RINOMINA COLONNE ---
-        # Rinomina le colonne dall'API ai nomi usati nel resto del progetto
-        df = df.rename(columns={
-            "stato":       "stato_odl",
-            "data_odl": "data_odl",
-            "descrizione": "descrizioni_odl",
-        })
+        df['giorni_trascorsi'] = (oggi - df['DATA_ODL']).dt.days
 
         # --- FILTRA SOLO LE COLONNE CHE ESISTONO ---
         # Mantieni solo le colonne definite in COLONNE_OUTPUT che esistono nel DataFrame

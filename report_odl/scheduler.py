@@ -76,14 +76,16 @@ def scheduled_report_steps():
             continue
 
         # Generazione grafici personalizzati
-        print(f"[{tecnico}] generazione grafici in corso.")
+        print(f"[{tecnico}] generazione grafico ODL in corso.")
         grafico_odl_raw = genera_grafico_plotly(df_tecnico)
         grafico_odl = grafico_to_base64(grafico_odl_raw)
 
         # Costruisce il corpo HTML del report con tabelle e grafici
+        print(f"[{tecnico}] generazione report HTML in corso.")
         html_body = build_html_report(tecnico, df_tecnico, df_rdi_desc, df_rdi_asc, grafico_odl, grafico_rdi)
 
         # Invia il report all'email del tecnico
+        print(f"[{tecnico}] Report e grafici creati: invio email in corso.")
         send_report(tecnico, email_dest, CC_EMAILS, html_body)
 
 
