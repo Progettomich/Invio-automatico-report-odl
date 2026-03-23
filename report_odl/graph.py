@@ -30,12 +30,12 @@ ORDINE_STATI = ["CONCLUSO", "SOSPESO", "IN CORSO", "DA FARE"]
 def genera_grafico_plotly(df):
     """Genera grafico Plotly ordinato per ORDINE_STATI"""
 
-    # Verifica che la colonna STATO esista nel DataFrame
-    if "STATO" not in df.columns:
-        raise ValueError("La colonna 'STATO' non è presente nel DataFrame")
+    # Verifica che la colonna stato_odl esista nel DataFrame
+    if "stato_odl" not in df.columns:
+        raise ValueError("La colonna 'stato_odl' non è presente nel DataFrame")
 
     # Conta quanti ODL ci sono per ogni stato
-    stato_counts = df["STATO"].value_counts()
+    stato_counts = df["stato_odl"].value_counts()
 
     # Filtra e ordina gli stati secondo ORDINE_STATI
     # (esclude stati non presenti nei dati)
