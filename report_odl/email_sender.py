@@ -56,7 +56,7 @@ def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="
         response.raise_for_status()
 
         # Registra nel log il successo dell'invio
-        
+        print(f"Report inviato correttamente a {nome_tecnico} ({email_destinatario})")
         logging.info(f"Report inviato correttamente a {nome_tecnico} ({email_destinatario})")
         return True
 

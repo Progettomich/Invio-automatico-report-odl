@@ -7,6 +7,12 @@ Generatore report giornaliero automatico scritto in Python
 Questo progetto Python automatizza l'invio dei report degli Ordini di Lavoro (ODL) ai tecnici.
 Scarica i dati da un'API interna, li elabora filtrando per tecnico, genera report HTML con tabelle e grafici, e invia email giornaliere automaticamente.
 
+## TODO
+
+- Strutturare meglio il report HTML.
+- Migliorare il logging.
+- Passare ad autenticazione con API KEY.
+
 ## Struttura del repository
 
 1.  [Connessione e richiamo dei dati dalla API](api.py)
