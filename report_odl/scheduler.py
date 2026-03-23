@@ -22,13 +22,13 @@ from email_sender import send_report
 
 # Importazione della lista tecnici e delle credenziali API dal file di configurazione
 from config import TECNICI
-from config import API_USER, API_PASS
+from config import API_USER, API_PASS, CC_EMAILS
 
 # Importazione delle funzioni per la generazione dei grafici
 from graph import genera_grafico_plotly, genera_grafico_torta_rdi, grafico_to_base64
 
 
-def run_weekly_report():
+def scheduled_report_steps():
     """
     Funzione principale che viene eseguita dal scheduler.
     Scarica i dati ODL, elabora i report per ciascun tecnico e invia le email.
@@ -38,9 +38,6 @@ def run_weekly_report():
     # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
     print("Scarico gli ODL per i tecnici.")
     df_all = fetch_odl_per_responsabili(API_USER, API_PASS)
-
-    # Controllo credenziali — da rimuovere in produzione
-    print(f"Credenziali: user={API_USER}, pass={API_PASS}")
 
     # 2. Scarica le RDI in ordine crescente (le più vecchie prima)
     print("Scarico RDI ascendenti")
@@ -62,6 +59,11 @@ def run_weekly_report():
     print("Elaboro i dati relativi alle RDI discendenti")
     df_rdi_desc = process_rdi(rdi_desc)
 
+    # Generazione grafici RDI
+    print(f"Generazione grafici RDI in corso.")
+    grafico_rdi_raw = genera_grafico_torta_rdi(df_rdi_desc)
+    grafico_rdi = grafico_to_base64(grafico_rdi_raw)
+
     # 5. Per ciascun tecnico costruisce il report HTML e lo invia via email
     for tecnico, df_tecnico in tecnici_dict.items():
 
@@ -73,27 +75,31 @@ def run_weekly_report():
             print(f"[{tecnico}] Email non trovata nel config, salto.")
             continue
 
+        # Generazione grafici personalizzati
+        print(f"[{tecnico}] generazione grafici in corso.")
+        grafico_odl_raw = genera_grafico_plotly(df_tecnico)
+        grafico_odl = grafico_to_base64(grafico_odl_raw)
+
         # Costruisce il corpo HTML del report con tabelle e grafici
-        html_body = build_html_report(tecnico, df_tecnico)
+        html_body = build_html_report(tecnico, df_tecnico, df_rdi_desc, df_rdi_asc, grafico_odl, grafico_rdi)
 
         # Invia il report all'email del tecnico
-        send_report(tecnico, email_dest, html_body)
+        send_report(tecnico, email_dest, CC_EMAILS, html_body)
 
 
 def schedule_report():
     """
-    Schedula l'esecuzione automatica della funzione run_weekly_report()
-    ogni LUNEDÌ alle 08:00.
+    Schedula l'esecuzione automatica della funzione scheduled_report_steps().
     """
 
     # --- MODALITÀ TEST: esegue ogni minuto per verificare il funzionamento ---
-    schedule.every(1).minutes.do(run_weekly_report)
+    schedule.every(1).minutes.do(scheduled_report_steps)
 
     # --- MODALITÀ PRODUZIONE: ogni lunedì alle 08:00 ---
     # Decommentare quando il codice è pronto e commentare la riga sopra
-    # schedule.every().monday.at("08:00").do(run_weekly_report)
+    # schedule.every().monday.at("08:00").do(scheduled_report_steps)
 
-    print(f"[{datetime.now()}] Scheduler avviato: report automatici ogni Lunedì alle 08:00")
+    print(f"[{datetime.now()}] Scheduler avviato: report automatici attivi")
 
     # Loop infinito che controlla ogni 30 secondi se è ora di eseguire il task
     # time.sleep(30) evita di sovraccaricare la CPU con controlli continui

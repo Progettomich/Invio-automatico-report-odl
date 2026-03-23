@@ -58,23 +58,23 @@ def process_data(dati_grezzi: dict) -> dict:
         if 'tecnico' not in df.columns:
             df['tecnico'] = ''
 
-        # Se la colonna 'DT_APERTURA' non esiste, la crea con valori nulli
-        if 'DT_APERTURA' not in df.columns:
-            df['DT_APERTURA'] = pd.NaT
+        # Se la colonna 'data_odl' non esiste, la crea con valori nulli
+        if 'data_odl' not in df.columns:
+            df['data_odl'] = pd.NaT
 
         # Converte la colonna data in formato datetime
         # errors='coerce' trasforma i valori non validi in NaT invece di dare errore
-        df['DT_APERTURA'] = pd.to_datetime(df['DT_APERTURA'], errors='coerce')
+        df['data_odl'] = pd.to_datetime(df['data_odl'], errors='coerce')
 
         # Calcola i giorni trascorsi dall'apertura dell'ODL ad oggi
         oggi = pd.Timestamp(datetime.now().date())
-        df['giorni_trascorsi'] = (oggi - df['DT_APERTURA']).dt.days
+        df['giorni_trascorsi'] = (oggi - df['data_odl']).dt.days
 
         # --- RINOMINA COLONNE ---
         # Rinomina le colonne dall'API ai nomi usati nel resto del progetto
         df = df.rename(columns={
             "stato":       "stato_odl",
-            "DT_APERTURA": "data_odl",
+            "data_odl": "data_odl",
             "descrizione": "descrizioni_odl",
         })
 

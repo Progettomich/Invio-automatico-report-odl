@@ -54,8 +54,7 @@ def fetch_odl_per_responsabili(
         params = {
             "user": user,           # username per autenticazione
             "password": password,   # password per autenticazione
-            # "limit": limit,         # numero massimo di record da ricevere
-            "limit": 1, 
+            "limit": limit,         # numero massimo di record da ricevere
             "page": page,           # numero di pagina (paginazione)
             "stato": stati,         # filtra per stato ODL (IN CORSO, SOSPESO, ecc.)
             "tecnico": responsabile, # filtra gli ODL per questo specifico tecnico

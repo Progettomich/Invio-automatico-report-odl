@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 
 
-def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL settimanale"):
+def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="Report ODL settimanale"):
     """
     Invia il report HTML al tecnico tramite richiesta POST all'API o via email SMTP.
     
@@ -39,7 +39,7 @@ def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL
     # Costruisce il corpo della richiesta POST con tutti i dati necessari per l'invio
     payload = {
         "to": email_destinatario,  # destinatario principale: email del tecnico
-        "cc": CC_EMAILS,           # indirizzi in copia conoscenza definiti in config.py
+        "cc": email_cc,           # indirizzi in copia conoscenza definiti in config.py
         "subject": subject,        # oggetto della email
         "text": f"Buongiorno {nome_tecnico}, in allegato il report ODL settimanale.",  # testo alternativo per client che non supportano HTML
         "html": html_body          # corpo HTML del report con tabelle e grafici
@@ -48,7 +48,6 @@ def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL
     try:
         # Invia il report tramite chiamata POST all'endpoint email dell'API
         # json=payload converte automaticamente il dizionario in formato JSON
-        API_ENDPOINT = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}"
         response = requests.post(email_endpoint_url, json=payload, timeout=10)
 
         # Se il server risponde con un codice di errore HTTP, genera un'eccezione
