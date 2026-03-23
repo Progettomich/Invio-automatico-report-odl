@@ -1,17 +1,15 @@
-# main.py
 
 from scheduler import schedule_report
 
-
 def main():
-    # Setup logging and startup application
-    print("Starting the application...")
+    # inizializza il report
+    print("Generazione report...")
     
-    # EXECUTE MAIN FUNCTION
-    schedule_report()
+    # avvia lo scheduler per la generazione e invio automatico dei report ogni settimana
+    scheduler.schedule_report()
     
-    # Log completion of the application
-    print("Application finished.")
+    # il programma rimane in esecuzione per permettere allo scheduler di funzionare
+    print("Report completato.")
 
 if __name__ == "__main__":
     main()

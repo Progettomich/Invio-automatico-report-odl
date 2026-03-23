@@ -11,8 +11,7 @@ def build_html_report(nome_tecnico: str, odl_tecnico: pd.DataFrame, rdi_desc: pd
     """
     
     # 1. Calcola i totali per le card verdi in alto
-    # Assicurati che 'stato' sia il nome corretto della colonna nel tuo DataFrame
-    # Se la colonna si chiama diversamente (es. 'STATO_ODL'), cambialo qui sotto.
+               
     colonna_stato = 'STATO_ODL' 
     
     if colonna_stato in odl_tecnico.columns:
@@ -39,8 +38,8 @@ def build_html_report(nome_tecnico: str, odl_tecnico: pd.DataFrame, rdi_desc: pd
         # ... (le tue altre variabili) ...
         grafico_base64_odl=grafico_odl_b64,  # <- Il grafico a barre
         grafico_base64_rdi=grafico_rdi_b64,  # <- Il grafico a torta
-        odl_list=odl_list,
-        rdi_desc_list=rdi_desc,
-        rdi_asc_list=rdi_asc,
+        odl_list=odl_list,                   # <- Tabella ODL
+        rdi_desc_list=rdi_desc,              # <- Tabella RDI più recenti
+        rdi_asc_list=rdi_asc,                # <- Tabella RDI più vecchi
     )
     return html_finale

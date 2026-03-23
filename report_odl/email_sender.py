@@ -15,7 +15,7 @@ def send_report(nome_tecnico, email_destinatario, html_body, subject="Report ODL
     Invia il report HTML al tecnico tramite richiesta POST all'API o via email SMTP.
     
     Parametri:
-        tecnico (str): nome del tecnico destinatario
+        nome_tecnico (str): nome del tecnico destinatario
         email_destinatario (str): indirizzo email del tecnico
         html_body (str): corpo del report in formato HTML
         subject (str): oggetto della mail (default="Report ODL settimanale")

@@ -1,4 +1,4 @@
-# report_odl/processing.py
+
 import pandas as pd
 from datetime import datetime
 
@@ -10,7 +10,7 @@ COLONNE_OUTPUT = [
     "causa_sospensione",
     "descrizione_bene",
     "fornitore",
-    "giorni_trascorsi",
+    "giorni_trascorsi"
 ]
 
 COLONNE_OUTPUT_RDI = [

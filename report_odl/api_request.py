@@ -1,5 +1,5 @@
 import requests
-# IMPORTANTE: Importa il dizionario dal tuo file di configurazione
+
 from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI
 
 # CHIAMATA API PER ODL
@@ -14,7 +14,7 @@ def fetch_odl_per_responsabili(
 ):
     """
     Scarica gli ODL per ciascun responsabile dalla API.
-    User e password vengono passati come query params (non come HTTP Basic Auth).
+    User e password vengono passati come query params.
     Gli stati vengono passati come stringa unica con virgole reali nell'URL.
     """
     
@@ -22,10 +22,10 @@ def fetch_odl_per_responsabili(
 
     endpoint_url = f"{API_ENDPOINT}{ODL_REPORT_ENDPOINT}"
     
-    # SE NON PASSI NESSUNA LISTA, PRENDE AUTOMATICAMENTE I NOMI DAL CONFIG.PY!
+    # la funzione inizia a prendere i dati per i responsabili che si trovano nella lista TECNICI
     if responsabili is None:
-        # list(TECNICI.keys()) prende solo i nomi ["Addamo FEDERICO", "PIETRAGALLA..."]
-        responsabili = list(TECNICI.keys()) 
+
+        responsabili = list(TECNICI.keys()) # list(TECNICI.keys()) prende solo i nomi ["Addamo FEDERICO", "PIETRAGALLA..."]
 
     risultati = {}
 
@@ -57,7 +57,7 @@ def fetch_odl_per_responsabili(
                 print("Numero record ricevuti:", len(data) if isinstance(data, list) else "non è una lista")
                 risultati[responsabile] = data
             else:
-                print("Errore HTTP:", response.status_code, response.text)
+                print("Errore HTTP ODL:", response.status_code, response.text)
                 risultati[responsabile] = None
 
         except requests.exceptions.RequestException as e:
