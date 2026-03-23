@@ -50,7 +50,7 @@ GMAIL_MITTENTE = "progetto.humanitasits@gmail.com"
 
 # App Password di Gmail — necessaria perché Gmail non accetta
 # la password normale per invii tramite codice
-GMAIL_APP_PASSWORD = "ICH16712!"
+GMAIL_APP_PASSWORD = "*********"
 
 # Indirizzi email in copia conoscenza (CC) per ogni report inviato
 CC_EMAILS = "sabrina.tapiabarzola@humanitas.it, federico.giacchibonetta@humanitas.it"
