@@ -6,7 +6,7 @@ def main():
     print("Generazione report...")
     
     # avvia lo scheduler per la generazione e invio automatico dei report ogni settimana
-    scheduler.schedule_report()
+    schedule_report()
     
     # il programma rimane in esecuzione per permettere allo scheduler di funzionare
     print("Report completato.")
