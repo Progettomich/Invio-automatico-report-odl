@@ -9,6 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 
 def build_html_report(
     nome_tecnico: str,
+    numero_odl: object,
     odl_tecnico: pd.DataFrame,
     rdi_desc: pd.DataFrame,
     rdi_asc: pd.DataFrame,
@@ -20,17 +21,8 @@ def build_html_report(
     grafici in base64 e calcolando i KPI da inserire nel template Jinja2.
     """
 
-    # Inizializza il dizionario per contare gli ODL suddivisi per stato
-    conteggi_stato = {}
-    
-    # Se la colonna 'STATO_ODL' esiste nel DataFrame, conta le occorrenze per ogni stato 
-    # (es. "IN CORSO": 3, "CONCLUSO": 5) e converte il risultato in un dizionario
-    if "STATO_ODL" in odl_tecnico.columns:
-        conteggi_stato = odl_tecnico["STATO_ODL"].value_counts().to_dict()
+    print(f"Costruzione report HTML per il tecnico: {nome_tecnico}")
 
-    # Calcola il totale degli ODL sospesi sommando eventuali diciture simili o errori di battitura.
-    # Usa .get(chiave, 0) per evitare errori nel caso in cui uno degli stati non sia presente.
-    sospesi = conteggi_stato.get("SOSPESO", 0) + conteggi_stato.get("SOSPESI", 0)
 
     # Prepara la lista di dizionari per la tabella ODL nel template HTML
     odl_list = (
@@ -73,6 +65,12 @@ def build_html_report(
     # Carica in memoria il file HTML che funge da scheletro per il report
     template = env.get_template("template_report.html")
 
+    ODL_IN_CORSO=numero_odl["IN_CORSO"],
+    ODL_SOSPESI=numero_odl["SOSPESO"],
+    ODL_CHIUSI=numero_odl["CONCLUSO"],
+
+    print(f"DEBUG: {ODL_IN_CORSO} ODL in corso, {ODL_SOSPESI} ODL sospesi, {ODL_CHIUSI} ODL chiusi."),
+
     # Inietta tutte le variabili e le liste calcolate all'interno del template HTML
     # La funzione .render() andrà a sostituire tutte le parentesi graffe {{ ... }} del file HTML
     html_finale = template.render(
@@ -82,9 +80,10 @@ def build_html_report(
         data_gen=datetime.now().strftime("%d/%m/%Y %H:%M"),
         
         # Variabili per valorizzare le 4 card in verde in alto nel report
-        IN_CORSO=conteggi_stato.get("IN CORSO", 0),
-        SOSPESI=sospesi,
-        CHIUSI=conteggi_stato.get("CONCLUSO", 0),
+        IN_CORSO=ODL_IN_CORSO,
+        SOSPESI=ODL_SOSPESI,
+        CHIUSI=ODL_CHIUSI,
+
         RDI_NON_PRESI=len(rdi_desc_list), # Numero di RDI calcolato contando le righe della tabella
         
         # Immagini dei grafici passate sotto forma di stringhe codificate in Base64

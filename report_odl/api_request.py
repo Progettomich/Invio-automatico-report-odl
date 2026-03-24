@@ -5,6 +5,7 @@ import requests
 # Importazione delle costanti di configurazione: endpoint API, credenziali e lista tecnici
 from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS, NUMERO_ODL_ENDPOINT, STATI
 
+from datetime import datetime
 
 # ============================================================
 # CHIAMATA API PER ODL
@@ -98,7 +99,8 @@ def fetch_odl_per_responsabili(
 def fetch_numero_odl(
         user=None,
         password=None,
-        date_from="2026-01-01",
+        date_from=datetime.today().strftime('%Y-%m-%d'),
+        date_to=datetime.today().strftime('%Y-%m-%d'),
         stati=None,
         limit=7,
         page=1,
@@ -129,17 +131,10 @@ def fetch_numero_odl(
     # chiave = nome tecnico, valore = dati ricevuti dall'API
     risultati = {}
 
-    # Se non viene passata una lista di stati,
-    # usa automaticamente tutti gli stati definiti in config.py
-    if stati is None:
-        stati = list(STATI.keys())
-
-    # Dizionario che conterrà i risultati per ogni stato
-    risultati = {}
 
     # Ciclo su ogni tecnico della lista per fare una chiamata API separata
-    for responsabile,stati in zip(responsabili, stati):
-        print(f"Elaborazione dati per responsabile: {responsabile}")
+    for responsabile in responsabili:
+        print(f"Richiesta numero ODL per responsabile: {responsabile}")
 
         # Parametri da passare nell'URL della richiesta GET
         params = {
@@ -147,12 +142,12 @@ def fetch_numero_odl(
             "password": password,   # password per autenticazione
             "limit": limit,         # numero massimo di record da ricevere
             "page": page,           # numero di pagina (paginazione)
-            "stato": stati,         # filtra per stato ODL (IN CORSO, SOSPESO, ecc.)
             "tecnico": responsabile, # filtra gli ODL per questo specifico tecnico
             "dateFrom": date_from,  # data di inizio del filtro
+            "dateTo" : date_to,       # data di fine del filtro (uguale a date_from per avere solo i dati di quel giorno)
         }
 
-        print(f"Richiesta per tecnico: {responsabile}")
+        print(f"Richiesta numero ODL per tecnico: {responsabile}")
 
         try:
             # Effettua la chiamata GET all'API con i parametri costruiti sopra
@@ -169,7 +164,7 @@ def fetch_numero_odl(
                 print("Numero record ricevuti:", len(data) if isinstance(data, list)
                       else f"risposta ricevuta (formato: {type(data).__name__})")
                 # Salva i dati nel dizionario dei risultati con il nome del tecnico come chiave
-                risultati[responsabile] = data["data"]["recordset"] if isinstance(data, dict) and "data" in data and "recordset" in data["data"] else []
+                risultati[responsabile] = data["data"]["recordset"][0] if isinstance(data, dict) and "data" in data and "recordset" in data["data"] and data["data"]["recordset"] else None
             else:
                 # In caso di errore HTTP stampa il codice e il messaggio di errore
                 print("Errore HTTP:", response.status_code, response.text)
@@ -181,6 +176,8 @@ def fetch_numero_odl(
             risultati[responsabile] = None
 
         print("-" * 50)
+
+        
 
     # Restituisce il dizionario completo con i dati di tutti i tecnici
     return risultati
