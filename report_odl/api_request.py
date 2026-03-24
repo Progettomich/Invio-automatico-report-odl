@@ -14,8 +14,10 @@ from datetime import datetime
 def fetch_odl_per_responsabili(
     user=None,
     password=None,
+    date_from=datetime.today().strftime('%Y-%m-%d'),
+    date_to=datetime.today().strftime('%Y-%m-%d'),
+    order_by="asc",
     stati="IN CORSO,SOSPESO,DA FARE",
-    date_from="2026-01-01",
     limit=15,
     page=1,
     responsabili=None
@@ -60,6 +62,8 @@ def fetch_odl_per_responsabili(
             "stato": stati,         # filtra per stato ODL (IN CORSO, SOSPESO, ecc.)
             "tecnico": responsabile, # filtra gli ODL per questo specifico tecnico
             "dateFrom": date_from,  # data di inizio del filtro
+            "dateTo" : date_to, # data di fine del filtro (uguale a date_from per avere solo i dati di quel giorno)
+            "orderBy": order_by,       # ordina i risultati in ordine crescente (più vecchi prima)
         }
 
         print(f"Richiesta per tecnico: {responsabile}")

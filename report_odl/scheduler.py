@@ -41,7 +41,7 @@ def scheduled_report_steps():
 
     # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
     print("Scarico gli ODL per i tecnici.")
-    df_all = fetch_odl_per_responsabili(API_USER, API_PASS)
+    df_all = fetch_odl_per_responsabili(API_USER, API_PASS, first_day_date, today_date)
 
     # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
     print("Scarico numero ODL per i tecnici.")
