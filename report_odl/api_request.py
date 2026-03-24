@@ -140,8 +140,8 @@ def fetch_rdi(
 
             # L'API restituisce un dizionario con una chiave "recordset"
             # che contiene la lista effettiva dei record RDI
-            if isinstance(data, dict) and "recordset" in data:
-                recordset = data["recordset"]
+            if isinstance(data, dict) and "data" in data and "recordset" in data["data"]:
+                recordset = data["data"]["recordset"]
                 print(f"-> Trovati {len(recordset)} record RDI.")
                 return recordset
             else:
