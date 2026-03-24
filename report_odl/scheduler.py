@@ -84,7 +84,7 @@ def scheduled_report_steps():
             continue
 
         # Filtra il DataFrame del numero di ODL per questo tecnico specifico
-        num_odl_tecnico = df_num_odl[tecnico]
+        num_odl_tecnico = df_num_odl.get(tecnico)
 
         # Generazione grafici personalizzati
         print(f"[{tecnico}] generazione grafico ODL in corso.")

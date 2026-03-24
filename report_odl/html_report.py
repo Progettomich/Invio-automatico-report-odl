@@ -65,9 +65,9 @@ def build_html_report(
     # Carica in memoria il file HTML che funge da scheletro per il report
     template = env.get_template("template_report.html")
 
-    ODL_IN_CORSO=numero_odl["IN_CORSO"],
-    ODL_SOSPESI=numero_odl["SOSPESO"],
-    ODL_CHIUSI=numero_odl["CONCLUSO"],
+    ODL_IN_CORSO=numero_odl.get("IN_CORSO", 0)
+    ODL_SOSPESI=numero_odl.get("SOSPESO", 0)
+    ODL_CHIUSI=numero_odl.get("CONCLUSO", 0)
 
     print(f"DEBUG: {ODL_IN_CORSO} ODL in corso, {ODL_SOSPESI} ODL sospesi, {ODL_CHIUSI} ODL chiusi."),
 
