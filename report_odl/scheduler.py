@@ -5,10 +5,13 @@ import schedule
 import time
 
 # Libreria per lavorare con date e ore
-from datetime import datetime
+from datetime import date, datetime
+
+# Libreria per gestire i percorsi dei file
+import os
 
 # Importazione delle funzioni per il recupero dei dati dall'API
-from api_request import fetch_odl_per_responsabili, fetch_rdi
+from api_request import fetch_numero_odl, fetch_odl_per_responsabili, fetch_rdi
 
 # Importazione delle funzioni per l'elaborazione dei dati ODL e RDI
 from processing import process_data
@@ -35,9 +38,16 @@ def scheduled_report_steps():
     """
     print("Esecuzione funzione Run Weekly Report iniziata.")
 
+    today_date = datetime.today().strftime('%Y-%m-%d')
+    first_day_date = f"{date.today().year}-01-01"
+
     # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
     print("Scarico gli ODL per i tecnici.")
-    df_all = fetch_odl_per_responsabili(API_USER, API_PASS)
+    df_all = fetch_odl_per_responsabili(API_USER, API_PASS, first_day_date, today_date)
+
+    # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
+    print("Scarico numero ODL per i tecnici.")
+    df_num_odl = fetch_numero_odl(API_USER, API_PASS, first_day_date, today_date)
 
     # 2. Scarica le RDI in ordine crescente (le più vecchie prima)
     print("Scarico RDI ascendenti")
@@ -64,6 +74,13 @@ def scheduled_report_steps():
     grafico_rdi_raw = genera_grafico_torta_rdi(df_rdi_desc)
     grafico_rdi = grafico_to_base64(grafico_rdi_raw)
 
+    # ----------------------------------------------------
+    # NUOVO: Crea una cartella "report_locali" se non esiste
+    # ----------------------------------------------------
+    output_dir = "report_locali"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     # 5. Per ciascun tecnico costruisce il report HTML e lo invia via email
     for tecnico, df_tecnico in tecnici_dict.items():
 
@@ -75,6 +92,9 @@ def scheduled_report_steps():
             print(f"[{tecnico}] Email non trovata nel config, salto.")
             continue
 
+        # Filtra il DataFrame del numero di ODL per questo tecnico specifico
+        num_odl_tecnico = df_num_odl.get(tecnico)
+
         # Generazione grafici personalizzati
         print(f"[{tecnico}] generazione grafico ODL in corso.")
         grafico_odl_raw = genera_grafico_plotly(df_tecnico)
@@ -82,7 +102,18 @@ def scheduled_report_steps():
 
         # Costruisce il corpo HTML del report con tabelle e grafici
         print(f"[{tecnico}] generazione report HTML in corso.")
-        html_body = build_html_report(tecnico, df_tecnico, df_rdi_desc, df_rdi_asc, grafico_odl, grafico_rdi)
+        html_body = build_html_report(tecnico, num_odl_tecnico, df_tecnico, df_rdi_desc, df_rdi_asc, grafico_odl, grafico_rdi)
+
+        # ----------------------------------------------------
+        # NUOVO: Salva il file HTML sul PC per fare debugging
+        # ----------------------------------------------------
+        # Sostituisce gli spazi nel nome con underscore per avere un nome file pulito
+        nome_file = f"{tecnico.replace(' ', '_')}_report.html"
+        percorso_file = os.path.join(output_dir, nome_file)
+        
+        with open(percorso_file, "w", encoding="utf-8") as file_html:
+            file_html.write(html_body)
+        print(f"[{tecnico}] Report salvato in locale in: {percorso_file}")
 
         # Invia il report all'email del tecnico
         print(f"[{tecnico}] Report e grafici creati: invio email in corso.")
