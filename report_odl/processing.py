@@ -114,7 +114,7 @@ def process_rdi(dati_rdi: list) -> pd.DataFrame:
         "DESCRIZIONE_RDI":   "DESCRIZIONE_RDI",
         "APERTA DA":         "APERTA_DA",       # nota: il nome originale ha uno spazio
         "DESCRIZIONE_BENE":  "DESCRIZIONE_BENE",
-        "N_INVETARIO":       "ICH",             # numero inventario rinominato in ICH
+        "N_INVENTARIO":       "ICH",             # numero inventario rinominato in ICH
         "REPARTO":           "REPARTO"          # usato anche nel grafico a torta
     }
     df = df.rename(columns=mappa_rinomina)

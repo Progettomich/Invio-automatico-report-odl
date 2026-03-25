@@ -105,7 +105,7 @@ def genera_grafico_torta_rdi(df_rdi_desc):
         width=800,
         height=400,
         showlegend=True,
-        # Legenda posizionata in basso al centro
+        # Legenda posizionata a destra
         legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
     )
     return fig
