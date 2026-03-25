@@ -64,6 +64,14 @@ def process_data(dati_grezzi: dict) -> dict:
         if 'DATA_ODL' not in df.columns:
             df['DATA_ODL'] = pd.NaT
 
+        # Rimozione zeri iniziali nella colonna degli ID_ODL
+        if 'N_ODL' in df.columns:
+            df['N_ODL'] = df['N_ODL'].astype(str).str.lstrip('0')
+
+        # Rimozione zeri iniziali nella colonna degli ID_RDI
+        if 'N_RDI' in df.columns:
+            df['N_RDI'] = df['N_RDI'].astype(str).str.lstrip('0')
+
         # Converte la colonna data in formato datetime
         # errors='coerce' trasforma i valori non validi in NaT invece di dare errore
         df['DATA_ODL'] = pd.to_datetime(df['DATA_ODL'], errors='coerce')
@@ -118,6 +126,10 @@ def process_rdi(dati_rdi: list) -> pd.DataFrame:
         "REPARTO":           "REPARTO"          # usato anche nel grafico a torta
     }
     df = df.rename(columns=mappa_rinomina)
+
+    # Rimozione zeri iniziali nella colonna degli ID_RDI
+    if 'N_RDI' in df.columns:
+        df['N_RDI'] = df['N_RDI'].astype(str).str.lstrip('0')
 
     # Mantieni solo le colonne definite in COLONNE_OUTPUT_RDI che esistono nel DataFrame
     colonne_presenti = [c for c in COLONNE_OUTPUT_RDI if c in df.columns]
