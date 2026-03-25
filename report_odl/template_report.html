@@ -45,6 +45,12 @@
       border-radius: 6px;
       flex: 1;
       min-width: 220px;
+      /* Modifiche per centrare da tutti i 4 lati */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
     }
 
     .card-value {
@@ -80,9 +86,11 @@
     th {
       background-color: #0b7a5c;
       color: #ffffff;
-      text-align: left;
       padding: 10px;
       font-weight: bold;
+      /* Modifiche per centrare */
+      text-align: center;
+      vertical-align: middle;
     }
 
     td {
@@ -91,6 +99,9 @@
       color: #333333;
       border-right: 2px solid #ffffff;
       border-bottom: 2px solid #ffffff;
+      /* Modifiche per centrare */
+      text-align: center;
+      vertical-align: middle;
     }
 
     td:last-child {
