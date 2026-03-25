@@ -3,7 +3,7 @@
 import requests
 
 # Importazione delle costanti di configurazione: endpoint API, credenziali e lista tecnici
-from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS, NUMERO_ODL_ENDPOINT, STATI
+from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS, NUMERO_ODL_ENDPOINT
 
 from datetime import datetime
 
