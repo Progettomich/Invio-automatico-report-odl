@@ -7,7 +7,7 @@ from scheduler import schedule_report
 
 def main():
     # Messaggio di avvio dell'applicazione
-    print("Avvio gnerazione report ODL...")
+    print("Avvio generazione report ODL...")
 
     # Avvia lo scheduler che esegue automaticamente il report ogni lunedì alle 08:00
     # Questa funzione contiene un loop infinito — il programma rimane in esecuzione
