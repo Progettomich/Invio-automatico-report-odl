@@ -15,7 +15,7 @@ from io import BytesIO
 # I colori sono in formato esadecimale
 COLOR_MAP = {
     "CONCLUSO": "#038262",  # verde
-    "SOSPESI":  "#f59e0b",  # arancione
+    "SOSPESO":  "#f59e0b",  # arancione
     "IN CORSO": "#009FE3",  # blu
     "DA FARE":  "#ef4444",  # rosso
 }
@@ -57,7 +57,7 @@ def genera_grafico_plotly(df):
     # Impostazioni grafiche del layout
     fig.update_layout(
         title="Distribuzione degli ODL per stato",
-        xaxis_title="Stato ODL",
+        xaxis=dict(type='category'),
         yaxis_title="Numero di ODL",
         width=800,
         height=500,
@@ -101,13 +101,14 @@ def genera_grafico_torta_rdi(df_rdi_desc):
 
     # Impostazioni grafiche del layout
     fig.update_layout(
-        title="Distribuzione RDI Non Presi per Reparto",
-        width=800,
-        height=400,
-        showlegend=True,
-        # Legenda posizionata a destra
-        legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
-    )
+    title="Distribuzione RDI Non Presi per Reparto",
+    width=800,
+    height=400,
+    showlegend=True,
+    # Aggiungi un margine inferiore (b) più ampio per far respirare il grafico
+    margin=dict(t=50, b=100, l=20, r=20), 
+    legend=dict(orientation="h", yanchor="top", y=-0.1, xanchor="center", x=0.5)
+)
     return fig
 
 

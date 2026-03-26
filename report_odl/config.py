@@ -49,7 +49,8 @@ TECNICI = {
 STATI = {
     "IN CORSO",
     "CONCLUSO",
-    "SOSPESO"
+    "SOSPESO",
+    "DA FARE"
 }
 
 
