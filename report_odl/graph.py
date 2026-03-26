@@ -27,42 +27,69 @@ ORDINE_STATI = ["CONCLUSO", "SOSPESO", "IN CORSO", "DA FARE"]
 # ============================================================
 # GRAFICO A BARRE — Distribuzione ODL per stato
 # ============================================================
-def genera_grafico_plotly(df):
-    """Genera grafico Plotly ordinato per ORDINE_STATI"""
+# ============================================================
+# GRAFICO A BARRE — Distribuzione ODL per stato
+# ============================================================
+def genera_grafico_plotly(dati_conteggio_api):
+    """
+    Genera grafico Plotly ordinato per ORDINE_STATI utilizzando
+    direttamente i totali pre-calcolati dall'API in formato dizionario.
+    """
 
-    # Verifica che la colonna stato_odl esista nel DataFrame
-    if "STATO_ODL" not in df.columns:
-        raise ValueError("La colonna 'STATO_ODL' non è presente nel DataFrame")
+    # 1. Sicurezza: Se i dati non arrivano, creiamo un dizionario vuoto
+    if not isinstance(dati_conteggio_api, dict):
+        dati_conteggio_api = {}
 
-    # Conta quanti ODL ci sono per ogni stato
-    stato_counts = df["STATO_ODL"].value_counts()
+    # 2. Mappatura: L'API restituisce i nomi con gli underscore ("IN_CORSO", "DA_FARE")
+    # mentre noi vogliamo mostrarli con gli spazi ("IN CORSO", "DA FARE")
+    chiavi_api = {
+        "CONCLUSO": "CONCLUSO",
+        "SOSPESO":  "SOSPESO",
+        "IN CORSO": "IN_CORSO",   
+        "DA FARE":  "DA_FARE"     
+    }
 
-    # Filtra e ordina gli stati secondo ORDINE_STATI
-    # (esclude stati non presenti nei dati)
-    stati_ordinati = [stato for stato in ORDINE_STATI if stato in stato_counts.index]
-    counts_ordinati = [stato_counts.get(stato, 0) for stato in stati_ordinati]
+    # 3. Costruiamo i dati basandoci strettamente sull'ORDINE_STATI
+    stati_ordinati = ORDINE_STATI 
+    
+    # Andiamo a leggere i valori dal dizionario JSON dell'API. Se non c'è, mettiamo 0
+    counts_ordinati = []
+    for stato in stati_ordinati:
+        chiave_esatta_api = chiavi_api[stato]
+        valore = dati_conteggio_api.get(chiave_esatta_api, 0)
+        counts_ordinati.append(valore)
 
-    # Crea il grafico a barre con Plotly
+    # 4. Creiamo la lista dei colori per le barre
+    colori_ordinati = [COLOR_MAP.get(stato, "#cccccc") for stato in stati_ordinati]
+
+    # 5. Creazione del grafico a barre
     fig = go.Figure(data=[
         go.Bar(
-            x=stati_ordinati,                                      # asse X: nomi degli stati
-            y=counts_ordinati,                                     # asse Y: numero di ODL
-            marker_color=[COLOR_MAP[stato] for stato in stati_ordinati],  # colore per ogni barra
-            text=[f'{int(c)}' for c in counts_ordinati],           # numero mostrato sopra ogni barra
-            textposition='outside',                                # posizione del numero
-            textfont=dict(size=14, family="Arial Black")           # stile del testo
+            x=stati_ordinati, 
+            y=counts_ordinati, 
+            marker_color=colori_ordinati,
+            text=[f'{int(c)}' for c in counts_ordinati], 
+            textposition='outside',
+            textfont=dict(size=14, family="Arial Black")
         )
     ])
 
-    # Impostazioni grafiche del layout
+    # 6. Impostazioni del layout
     fig.update_layout(
         title="Distribuzione degli ODL per stato",
-        xaxis=dict(type='category'),
-        yaxis_title="Numero di ODL",
+        xaxis=dict(
+            title="Stato ODL",
+            type='category' # Forza l'asse a testo per evitare vuoti
+        ),
+        yaxis=dict(
+            title="Numero di ODL",
+            range=[0, max(counts_ordinati) * 1.2 if counts_ordinati and max(counts_ordinati) > 0 else 5]
+        ),
         width=800,
         height=500,
         font=dict(family="Arial", size=12)
     )
+
     return fig
 
 

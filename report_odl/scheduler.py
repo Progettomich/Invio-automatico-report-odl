@@ -97,7 +97,7 @@ def scheduled_report_steps():
 
         # Generazione grafici personalizzati
         print(f"[{tecnico}] generazione grafico ODL in corso.")
-        grafico_odl_raw = genera_grafico_plotly(df_tecnico)
+        grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
         grafico_odl = grafico_to_base64(grafico_odl_raw)
 
         # Costruisce il corpo HTML del report con tabelle e grafici
