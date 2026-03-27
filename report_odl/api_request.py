@@ -194,7 +194,7 @@ def fetch_numero_odl(
 def fetch_rdi(
     user=None,
     password=None,
-    limit=100,
+    limit=10,
     page=1,
     stato="creata",
     orderBy="asc"
