@@ -17,12 +17,14 @@
       color: #0b7a5c;
       font-size: 28px;
       font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 10px;
       margin-bottom: 10px;
       border-bottom: 2px solid #0b7a5c;
       padding-bottom: 10px;
+    }
+
+    .header-icon {
+      margin-right: 10px;
+      vertical-align: middle;
     }
 
     .subtitle {
@@ -31,84 +33,112 @@
       margin-bottom: 25px;
     }
 
-    .cards-container {
-      display: flex;
-      gap: 30px;
+    /* ---------------------------------------------------
+       NUOVE CLASSI PER IL LAYOUT COMPATIBILE CON OUTLOOK 
+       --------------------------------------------------- */
+    .layout-table {
+      width: 100%;
+      border-collapse: collapse;
       margin-bottom: 40px;
-      flex-wrap: wrap;
     }
 
-    .card {
-      background-color: #edf3e0;
+    /* Sovrascriviamo lo stile dei td generici per le celle di layout */
+    .layout-table td.layout-cell {
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      vertical-align: top;
+    }
+
+    .spacer-2 {
+      width: 2%;
+      /* Spazio tra le card KPI */
+    }
+
+    .spacer-4 {
+      width: 4%;
+      /* Spazio tra i grafici */
+    }
+
+    /* ---------------------------------------------------
+       STILE TABELLE KPI (Ex Card)
+       --------------------------------------------------- */
+    .kpi-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
       border: 2px solid #0b7a5c;
-      padding: 15px 20px;
       border-radius: 6px;
-      flex: 1;
-      min-width: 220px;
-      /* Modifiche per centrare da tutti i 4 lati */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
+      overflow: hidden;
     }
 
-    .card-value {
+    .kpi-table td {
+      border: none;
+      padding: 15px 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .kpi-value {
+      background-color: #edf3e0;
       color: #0b7a5c;
       font-size: 26px;
       font-weight: bold;
-      margin-bottom: 5px;
     }
 
-    .card-label {
+    .kpi-label {
+      background-color: #0b7a5c;
+      color: #ffffff;
       font-size: 13px;
-      color: #555555;
     }
 
     .section-title {
       font-size: 18px;
       font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       margin-bottom: 15px;
       color: #333333;
       margin-top: 30px;
     }
 
-    table {
+    .section-icon {
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* ---------------------------------------------------
+       STILI TABELLE GENERICHE (Dati)
+       --------------------------------------------------- */
+    table.data-table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 20px;
       font-size: 13px;
     }
 
-    th {
+    table.data-table th {
       background-color: #0b7a5c;
       color: #ffffff;
       padding: 10px;
       font-weight: bold;
-      /* Modifiche per centrare */
       text-align: center;
       vertical-align: middle;
     }
 
-    td {
+    table.data-table td {
       background-color: #edf3e0;
       padding: 10px;
       color: #333333;
       border-right: 2px solid #ffffff;
       border-bottom: 2px solid #ffffff;
-      /* Modifiche per centrare */
       text-align: center;
       vertical-align: middle;
     }
 
-    td:last-child {
+    table.data-table td:last-child {
       border-right: none;
     }
 
-    tr:last-child td {
+    table.data-table tr:last-child td {
       border-bottom: none;
     }
 
@@ -120,68 +150,111 @@
       margin-top: 50px;
     }
 
-    .chart-container {
-      display: flex;
-      gap: 20px;
-      justify-content: space-between;
-      margin-bottom: 40px;
-    }
-
     .chart-box {
-      flex: 1;
       text-align: center;
       background-color: #fcfcfc;
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #eeeeee;
     }
+
+    .chart-box img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
   </style>
 </head>
 
 <body>
   <div class="header-title">
-    <span>📋</span> MICH — Report ODL e RDI — {{ nome }}
+    <span class="header-icon">📋</span> MICH — Report ODL e RDI — {{ nome }}
   </div>
   <div class="subtitle">Generato il: {{ data_gen }}</div>
 
-  <!-- KPI CARDS -->
-  <div class="cards-container">
-    <div class="card">
-      <div class="card-value">{{ IN_CORSO }}</div>
-      <div class="card-label">ODL in corso</div>
-    </div>
-    <div class="card">
-      <div class="card-value">{{ SOSPESI }}</div>
-      <div class="card-label">ODL Sospesi / In attesa ricambio</div>
-    </div>
-    <div class="card">
-      <div class="card-value">{{ CHIUSI }}</div>
-      <div class="card-label">ODL Chiusi</div>
-    </div>
-    <div class="card">
-      <div class="card-value">{{ TOTALE_ODL }}</div>
-      <div class="card-label">ODL Totali presi in carico</div>
-    </div>
-  </div>
+  <!-- KPI TRASFORMATE IN LAYOUT A TABELLA PER OUTLOOK -->
+  <table class="layout-table">
+    <tr>
+      <!-- Card 1 -->
+      <td width="23.5%" class="layout-cell">
+        <table class="kpi-table">
+          <tr>
+            <td class="kpi-value">{{ IN_CORSO }}</td>
+          </tr>
+          <tr>
+            <td class="kpi-label">ODL in corso</td>
+          </tr>
+        </table>
+      </td>
+      <!-- Spazio -->
+      <td class="layout-cell spacer-2"></td>
+      <!-- Card 2 -->
+      <td width="23.5%" class="layout-cell">
+        <table class="kpi-table">
+          <tr>
+            <td class="kpi-value">{{ SOSPESI }}</td>
+          </tr>
+          <tr>
+            <td class="kpi-label">ODL Sospesi / In attesa ricambio</td>
+          </tr>
+        </table>
+      </td>
+      <!-- Spazio -->
+      <td class="layout-cell spacer-2"></td>
+      <!-- Card 3 -->
+      <td width="23.5%" class="layout-cell">
+        <table class="kpi-table">
+          <tr>
+            <td class="kpi-value">{{ CHIUSI }}</td>
+          </tr>
+          <tr>
+            <td class="kpi-label">ODL Chiusi</td>
+          </tr>
+        </table>
+      </td>
+      <!-- Spazio -->
+      <td class="layout-cell spacer-2"></td>
+      <!-- Card 4 -->
+      <td width="23.5%" class="layout-cell">
+        <table class="kpi-table">
+          <tr>
+            <td class="kpi-value">{{ TOTALE_ODL }}</td>
+          </tr>
+          <tr>
+            <td class="kpi-label">ODL Totali presi in carico</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 
-  <!-- SEZIONE GRAFICI AFFIANCATI -->
-  <div class="section-title"><span>📊</span> Analisi Visiva ODL e RDI</div>
-  <div class="chart-container">
-    <!-- GRAFICO A BARRE (ODL Personali) -->
-    <div class="chart-box">
-      <img src="{{ grafico_base64_odl }}" alt="Grafico ODL">
-    </div>
-    <!-- GRAFICO A TORTA (RDI Globali) -->
-    <div class="chart-box">
-      <img src="{{ grafico_base64_rdi }}" alt="Grafico RDI">
-    </div>
-  </div>
+  <!-- SEZIONE GRAFICI AFFIANCATI (Layout Tabella per Outlook) -->
+  <div class="section-title"><span class="section-icon">📊</span> Analisi Visiva ODL e RDI</div>
+  <table class="layout-table">
+    <tr>
+      <!-- GRAFICO A BARRE -->
+      <td width="48%" class="layout-cell">
+        <div class="chart-box">
+          <img src="{{ grafico_base64_odl }}" alt="Grafico ODL">
+        </div>
+      </td>
+      <!-- Spazio -->
+      <td class="layout-cell spacer-4"></td>
+      <!-- GRAFICO A TORTA -->
+      <td width="48%" class="layout-cell">
+        <div class="chart-box">
+          <img src="{{ grafico_base64_rdi }}" alt="Grafico RDI">
+        </div>
+      </td>
+    </tr>
+  </table>
 
   <!-- TABELLA 1: ODL PERSONALI -->
   <div class="section-title">
-    <span>📄</span> Dettaglio Ordini di Lavoro (ODL)
+    <span class="section-icon">📄</span> Dettaglio Ordini di Lavoro (ODL)
   </div>
-  <table>
+  <table class="data-table">
     <thead>
       <tr>
         <th>ID ODL</th>
@@ -208,11 +281,11 @@
     </tbody>
   </table>
 
-  <!-- TABELLA 2: RDI DESC (Più recenti) -->
+  <!-- TABELLA 2: RDI DESC -->
   <div class="section-title">
-    <span>📥</span> RDI Non Presi (Più recenti - Ultimi 10)
+    <span class="section-icon">📥</span> RDI Non Presi (Più recenti - Ultimi 10)
   </div>
-  <table>
+  <table class="data-table">
     <thead>
       <tr>
         <th>N RDI</th>
@@ -239,11 +312,11 @@
     </tbody>
   </table>
 
-  <!-- TABELLA 3: RDI ASC (Più vecchi) -->
+  <!-- TABELLA 3: RDI ASC -->
   <div class="section-title">
-    <span>📤</span> RDI Non Presi (Più vecchi - Primi 10)
+    <span class="section-icon">📤</span> RDI Non Presi (Più vecchi - Primi 10)
   </div>
-  <table>
+  <table class="data-table">
     <thead>
       <tr>
         <th>N RDI</th>
