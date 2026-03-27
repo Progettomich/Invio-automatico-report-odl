@@ -30,7 +30,6 @@ from config import API_USER, API_PASS, CC_EMAILS
 # Importazione delle funzioni per la generazione dei grafici
 from graph import genera_grafico_plotly, genera_grafico_torta_rdi, grafico_to_base64
 
-
 def scheduled_report_steps():
     """
     Funzione principale che viene eseguita dal scheduler.
@@ -58,7 +57,6 @@ def scheduled_report_steps():
     rdi_desc = fetch_rdi(user=API_USER, password=API_PASS, limit=10, page=1, stato="creata", orderBy="desc")
 
     # 3. Elabora i dati ODL grezzi e li organizza per tecnico
-    # Restituisce un dizionario { nome_tecnico: DataFrame }
     print("Elaboro dati relativi agli ODL")
     tecnici_dict = process_data(df_all)
 
@@ -69,10 +67,10 @@ def scheduled_report_steps():
     print("Elaboro i dati relativi alle RDI discendenti")
     df_rdi_desc = process_rdi(rdi_desc)
 
-    # Generazione grafici RDI
+    # Generazione grafici RDI (crea la stringa Base64 pura)
     print(f"Generazione grafici RDI in corso.")
     grafico_rdi_raw = genera_grafico_torta_rdi(df_rdi_desc)
-    grafico_rdi = grafico_to_base64(grafico_rdi_raw)
+    grafico_rdi_b64 = grafico_to_base64(grafico_rdi_raw) # <--- Ora è Base64 puro
 
     # ----------------------------------------------------
     # NUOVO: Crea una cartella "report_locali" se non esiste
@@ -87,27 +85,32 @@ def scheduled_report_steps():
         # Recupera l'email del tecnico dal dizionario TECNICI in config.py
         email_dest = TECNICI.get(tecnico, "")
 
-        # Se l'email non è presente nel config, salta questo tecnico
         if not email_dest:
             print(f"[{tecnico}] Email non trovata nel config, salto.")
             continue
 
-        # Filtra il DataFrame del numero di ODL per questo tecnico specifico
         num_odl_tecnico = df_num_odl.get(tecnico)
 
-        # Generazione grafici personalizzati
+        # Generazione grafico ODL (crea la stringa Base64 pura)
         print(f"[{tecnico}] generazione grafico ODL in corso.")
         grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
-        grafico_odl = grafico_to_base64(grafico_odl_raw)
+        grafico_odl_b64 = grafico_to_base64(grafico_odl_raw) 
 
-        # Costruisce il corpo HTML del report con tabelle e grafici
+        # Costruisce il corpo HTML del report passando le stringhe cid al posto delle stringhe base64 lunghissime
         print(f"[{tecnico}] generazione report HTML in corso.")
-        html_body = build_html_report(tecnico, num_odl_tecnico, df_tecnico, df_rdi_desc, df_rdi_asc, grafico_odl, grafico_rdi)
+        html_body = build_html_report(
+            nome_tecnico=tecnico, 
+            numero_odl=num_odl_tecnico, 
+            odl_tecnico=df_tecnico, 
+            rdi_desc=df_rdi_desc, 
+            rdi_asc=df_rdi_asc, 
+            grafico_odl_b64="cid:grafico_odl.png",  
+            grafico_rdi_b64="cid:grafico_rdi.png"  
+        )
 
         # ----------------------------------------------------
-        # NUOVO: Salva il file HTML sul PC per fare debugging
+        # Salvataggio del file HTML locale (per debugging)
         # ----------------------------------------------------
-        # Sostituisce gli spazi nel nome con underscore per avere un nome file pulito
         nome_file = f"{tecnico.replace(' ', '_')}_report.html"
         percorso_file = os.path.join(output_dir, nome_file)
         
@@ -115,10 +118,33 @@ def scheduled_report_steps():
             file_html.write(html_body)
         print(f"[{tecnico}] Report salvato in locale in: {percorso_file}")
 
-        # Invia il report all'email del tecnico
-        print(f"[{tecnico}] Report e grafici creati: invio email in corso.")
-        send_report(tecnico, email_dest, CC_EMAILS, html_body)
+        # ----------------------------------------------------
+        # MODIFICA: Preparazione della lista allegati
+        # ----------------------------------------------------
+        miei_allegati = [
+            {
+                "filename": "grafico_odl.png",
+                "content": grafico_odl_b64,
+                "encoding": "base64",
+                "cid": "grafico_odl.png"  # Collega l'allegato al tag HTML <img src="cid:grafico_odl.png">
+            },
+            {
+                "filename": "grafico_rdi.png",
+                "content": grafico_rdi_b64,
+                "encoding": "base64",
+                "cid": "grafico_rdi.png"  # Collega l'allegato al tag HTML <img src="cid:grafico_rdi.png">
+            }
+        ]
 
+        # Invia il report all'email del tecnico includendo gli allegati
+        print(f"[{tecnico}] Report e grafici creati: invio email in corso.")
+        send_report(
+            nome_tecnico=tecnico, 
+            email_destinatario=email_dest, 
+            email_cc=CC_EMAILS, 
+            html_body=html_body,
+            allegati=miei_allegati # <-- Passiamo l'array di allegati
+        )
 
 def schedule_report():
     """
@@ -128,21 +154,17 @@ def schedule_report():
     # --- MODALITÀ TEST: esegue ogni minuto per verificare il funzionamento ---
     schedule.every(1).minutes.do(scheduled_report_steps)
 
-    # --- MODALITÀ PRODUZIONE: ogni lunedì alle 08:00 ---
+     # --- MODALITÀ PRODUZIONE: ogni lunedì alle 08:00 ---
     # Decommentare quando il codice è pronto e commentare la riga sopra
     # schedule.every().monday.at("08:00").do(scheduled_report_steps)
 
     print(f"[{datetime.now()}] Scheduler avviato: report automatici attivi")
 
-    # Loop infinito che controlla ogni 30 secondi se è ora di eseguire il task
-    # time.sleep(30) evita di sovraccaricare la CPU con controlli continui
     while True:
-        schedule.run_pending()  # esegue i task in scadenza
-        time.sleep(30)          # attende 30 secondi prima del prossimo controllo
-
+        schedule.run_pending()
+        time.sleep(30)
 
 # Avvio manuale per test
-# Questo blocco viene eseguito solo quando il file viene avviato direttamente
 if __name__ == "__main__":
     print("Avvio manuale per TEST immediato...")
-    schedule_report()
+    scheduled_report_steps() # <-- Chiamiamo direttamente la funzione per fare un test istantaneo, invece di aspettare il minuto

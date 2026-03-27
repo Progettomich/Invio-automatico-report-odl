@@ -7,11 +7,7 @@ import logging
 # Importazione delle costanti di configurazione per email e API
 from config import CC_EMAILS, MAIL_SEND_ENDPOINT, API_ENDPOINT, API_USER, API_PASS
 
-
-# Configurazione del sistema di logging:
-# - salva i log nel file "odl_report.log"
-# - registra tutti i messaggi di livello INFO e superiore
-# - formato: data/ora - livello - messaggio
+# Configurazione del sistema di logging
 logging.basicConfig(
     filename="odl_report.log",
     level=logging.INFO,
@@ -19,31 +15,25 @@ logging.basicConfig(
 )
 
 
-def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="Report ODL settimanale"):
+def send_report(nome_tecnico, email_destinatario, email_cc, html_body, subject="Report ODL settimanale", allegati=None):
     """
-    Invia il report HTML al tecnico tramite richiesta POST all'API o via email SMTP.
-    
-    Parametri:
-        tecnico (str): nome del tecnico destinatario
-        email_destinatario (str): indirizzo email del tecnico
-        html_body (str): corpo del report in formato HTML
-        subject (str): oggetto della mail (default="Report ODL settimanale")
-    
-    Ritorna:
-        bool: True se l'invio è andato a buon fine, False altrimenti
+    Invia il report HTML al tecnico tramite richiesta POST all'API.
     """
-
     # Costruisce l'URL completo dell'endpoint per l'invio email
     email_endpoint_url = f"{API_ENDPOINT}{MAIL_SEND_ENDPOINT}?user={API_USER}&password={API_PASS}"
 
     # Costruisce il corpo della richiesta POST con tutti i dati necessari per l'invio
     payload = {
-        "to": email_destinatario,  # destinatario principale: email del tecnico
-        "cc": email_cc,           # indirizzi in copia conoscenza definiti in config.py
-        "subject": subject,        # oggetto della email
-        "text": f"Buongiorno {nome_tecnico}, in allegato il report ODL settimanale.",  # testo alternativo per client che non supportano HTML
-        "html": html_body          # corpo HTML del report con tabelle e grafici
+        "to": email_destinatario,  
+        "cc": email_cc,           
+        "subject": subject,        
+        "text": f"Buongiorno {nome_tecnico}, in allegato il report ODL settimanale.",
+        "html": html_body         
     }
+
+    # Se passiamo degli allegati dalla funzione principale, li aggiungiamo al JSON
+    if allegati:
+        payload["attachments"] = allegati
 
     print(f"Prepared email. To: {email_destinatario}, CC: {email_cc}, Subject: {subject}")
 

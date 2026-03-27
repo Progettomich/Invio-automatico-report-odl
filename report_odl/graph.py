@@ -145,7 +145,7 @@ def genera_grafico_torta_rdi(df_rdi_desc):
 # per poterla incorporare direttamente nell'HTML della email
 # ============================================================
 def grafico_to_base64(fig):
-    """Converte qualsiasi grafico Plotly in base64 per HTML"""
+    """Converte qualsiasi grafico Plotly in base64 puro (senza header html)"""
 
     # Esporta il grafico come immagine PNG in memoria
     img_bytes = fig.to_image(format="png", width=800, height=400)
@@ -153,6 +153,5 @@ def grafico_to_base64(fig):
     # Codifica l'immagine in base64 e la converte in stringa
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
 
-    # Restituisce la stringa nel formato corretto per essere
-    # usata direttamente come src di un tag <img> nell'HTML
-    return f"data:image/png;base64,{img_base64}"
+    # Ritorna SOLO il codice, che l'API tradurrà in un file fisico
+    return img_base64
