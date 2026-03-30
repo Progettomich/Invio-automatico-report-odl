@@ -85,9 +85,10 @@ def genera_grafico_plotly(dati_conteggio_api):
             title="Numero di ODL",
             range=[0, max(counts_ordinati) * 1.2 if counts_ordinati and max(counts_ordinati) > 0 else 5]
         ),
-        width=800,
-        height=500,
-        font=dict(family="Arial", size=12)
+        width=420,
+        height=420,
+        margin=dict(l=40, r=20, t=40, b=40),
+        font=dict(family="Arial", size=11)
     )
 
     return fig
@@ -129,12 +130,12 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     # Impostazioni grafiche del layout
     fig.update_layout(
     title="Distribuzione RDI Non Presi per Reparto",
-    width=800,
-    height=400,
+    width=420,
+    height=420,
     showlegend=True,
     # Aggiungi un margine inferiore (b) più ampio per far respirare il grafico
-    margin=dict(t=50, b=100, l=20, r=20), 
-    legend=dict(orientation="h", yanchor="top", y=-0.1, xanchor="center", x=0.5)
+    margin=dict(t=40, b=130, l=10, r=10), 
+    legend=dict(orientation="h", yanchor="top", y=-0.1, xanchor="center", x=0.5, font=dict(size=10))
 )
     return fig
 
@@ -148,7 +149,7 @@ def grafico_to_base64(fig):
     """Converte qualsiasi grafico Plotly in base64 puro (senza header html)"""
 
     # Esporta il grafico come immagine PNG in memoria
-    img_bytes = fig.to_image(format="png", width=800, height=400)
+    img_bytes = fig.to_image(format="png")
 
     # Codifica l'immagine in base64 e la converte in stringa
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
