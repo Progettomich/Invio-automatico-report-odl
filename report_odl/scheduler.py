@@ -108,15 +108,25 @@ def scheduled_report_steps():
             grafico_rdi_b64="cid:grafico_rdi.png"  
         )
 
-        # ----------------------------------------------------
+                # ----------------------------------------------------
         # Salvataggio del file HTML locale (per debugging)
         # ----------------------------------------------------
         nome_file = f"{tecnico.replace(' ', '_')}_report.html"
         percorso_file = os.path.join(output_dir, nome_file)
         
+        # Sostituiamo i riferimenti 'cid:' con le stringhe Base64 complete per la visualizzazione offline nel browser
+        html_locale = html_body.replace(
+            "cid:grafico_odl.png", 
+            f"data:image/png;base64,{grafico_odl_b64}"
+        ).replace(
+            "cid:grafico_rdi.png", 
+            f"data:image/png;base64,{grafico_rdi_b64}"
+        )
+        
+        # Salviamo la versione modificata (html_locale) e non html_body
         with open(percorso_file, "w", encoding="utf-8") as file_html:
-            file_html.write(html_body)
-        print(f"[{tecnico}] Report salvato in locale in: {percorso_file}")
+            file_html.write(html_locale)
+        print(f"[{tecnico}] Report salvato in locale con grafici visibili in: {percorso_file}")
 
         # ----------------------------------------------------
         # MODIFICA: Preparazione della lista allegati
