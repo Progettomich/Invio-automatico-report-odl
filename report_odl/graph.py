@@ -10,7 +10,6 @@ import base64
 # Libreria per gestire i dati binari in memoria senza salvare su disco
 from io import BytesIO
 
-
 # Dizionario che associa ogni stato ODL al suo colore nel grafico
 # I colori sono in formato esadecimale
 COLOR_MAP = {
@@ -24,9 +23,6 @@ COLOR_MAP = {
 ORDINE_STATI = ["CONCLUSO", "SOSPESO", "IN CORSO", "DA FARE"]
 
 
-# ============================================================
-# GRAFICO A BARRE — Distribuzione ODL per stato
-# ============================================================
 # ============================================================
 # GRAFICO A BARRE — Distribuzione ODL per stato
 # ============================================================
@@ -86,8 +82,8 @@ def genera_grafico_plotly(dati_conteggio_api):
             range=[0, max(counts_ordinati) * 1.2 if counts_ordinati and max(counts_ordinati) > 0 else 5]
         ),
         width=420,
-        height=420,
-        margin=dict(l=40, r=20, t=40, b=40),
+        height=450,
+        margin=dict(l=40, r=20, t=40, b=120),
         font=dict(family="Arial", size=11)
     )
 
@@ -98,45 +94,75 @@ def genera_grafico_plotly(dati_conteggio_api):
 # GRAFICO A TORTA — Distribuzione RDI per reparto
 # ============================================================
 def genera_grafico_torta_rdi(df_rdi_desc):
-    """Genera grafico a torta per la distribuzione RDI per reparto."""
+    """
+    Genera grafico a torta per la distribuzione RDI per reparto.
+    Mostra i primi 5 reparti in ordine decrescente; i restanti vengono sommati 
+    in un'unica categoria "Altro".
+    """
 
-    # Nome della colonna che contiene il reparto nel DataFrame RDI
-    colonna_reparto = "REPARTO"  # <-- Cambia se nel JSON si chiama diversamente
+    colonna_reparto = "REPARTO" 
 
-    # Se il DataFrame è vuoto o manca la colonna reparto,
-    # restituisce un grafico vuoto con messaggio
+    # 1. Sicurezza: Se il DataFrame è vuoto o manca la colonna, grafico vuoto
     if df_rdi_desc.empty or colonna_reparto not in df_rdi_desc.columns:
         fig = go.Figure()
         fig.update_layout(title="Nessun RDI disponibile per il grafico a torta", width=800, height=400)
         return fig
 
-    # Conta quante RDI ci sono per ogni reparto
-    # I valori mancanti vengono sostituiti con "Sconosciuto"
+    # 2. CONTEGGIO DEI REPARTI E ORDINAMENTO
+    # df.value_counts() raggruppa, conta e ordina in automatico dal più grande al più piccolo
     reparti_counts = df_rdi_desc[colonna_reparto].fillna("Sconosciuto").value_counts()
-    labels = reparti_counts.index.tolist()   # nomi dei reparti
-    values = reparti_counts.values.tolist()  # numero di RDI per reparto
 
-    # Crea il grafico a torta con Plotly
+    # 3. FILTRO "TOP 5" E RAGGRUPPAMENTO "ALTRO"
+    numero_massimo_fette = 5
+
+    # Controlla se abbiamo più di 5 reparti totali
+    if len(reparti_counts) > numero_massimo_fette:
+        # Prende i primi 5 (i più grandi)
+        top_reparti = reparti_counts.head(numero_massimo_fette)
+        
+        # Somma i valori di tutti gli altri reparti (dal 6° in poi)
+        somma_altri = reparti_counts.iloc[numero_massimo_fette:].sum()
+        
+        # Aggiunge la categoria "Altro" al nostro blocco dei Top 5
+        top_reparti["Altro"] = somma_altri
+        
+        reparti_da_graficare = top_reparti
+    else:
+        # Se ci sono 5 reparti o meno, li usiamo tutti senza fare "Altro"
+        reparti_da_graficare = reparti_counts
+
+    # 4. ESTRAZIONE DATI PER IL GRAFICO
+    labels = reparti_da_graficare.index.tolist()   # nomi (Top 5 + "Altro")
+    values = reparti_da_graficare.values.tolist()  # conteggi assoluti corrispondenti
+
+    # 5. CREAZIONE GRAFICO A TORTA
     fig = go.Figure(data=[
         go.Pie(
             labels=labels,
             values=values,
-            textinfo='percent',                # mostra solo la percentuale nelle fette
-            insidetextorientation='radial',    # testo orientato radialmente
-            marker=dict(line=dict(color='#ffffff', width=2))  # bordo bianco tra le fette
+            textinfo='percent',  # Plotly converte automaticamente i valori in percentuali visive
+            insidetextorientation='radial',
+            marker=dict(line=dict(color='#ffffff', width=2)) 
         )
     ])
 
-    # Impostazioni grafiche del layout
+    # 6. IMPOSTAZIONI LAYOUT
     fig.update_layout(
-    title="Distribuzione RDI Non Presi per Reparto",
-    width=420,
-    height=420,
-    showlegend=True,
-    # Aggiungi un margine inferiore (b) più ampio per far respirare il grafico
-    margin=dict(t=40, b=130, l=10, r=10), 
-    legend=dict(orientation="h", yanchor="top", y=-0.1, xanchor="center", x=0.5, font=dict(size=10))
-)
+        title="Distribuzione RDI Non Presi per Reparto",
+        width=420,
+        height=450,
+        showlegend=True,
+        # Margini sistemati per una torta pulita e centrata
+        margin=dict(t=40, b=120, l=10, r=10), 
+        legend=dict(
+            orientation="h", 
+            yanchor="top", 
+            y=-0.05, 
+            xanchor="center", 
+            x=0.5, 
+            font=dict(size=10)
+        )
+    )
     return fig
 
 

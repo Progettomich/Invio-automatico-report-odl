@@ -53,6 +53,17 @@ STATI = {
     "DA FARE"
 }
 
+# --- Lista del tipo di profilo che possono avere i responsabili ---
+# Viene usata per filtrare i dati degli RDI in base al tipo di profilo del responsabile (es. "TECNICO", "FREDDO", "FERRI", "ALTRO")
+PROFILI = {
+    "Addamo Federico" : "tecnici",
+    "Urbina Zabaleta Maria" : "tecnici",
+    "Pietragalla Canio" : "tecnici",
+    "Galimberti Carlo" : "tecnici",
+    "Rizzo Alessandro" : "ferri",
+    "Ghilardotti Gilberto" : "freddo",
+    "Valentino Angelo" : "altro"
+}
 
 # Indirizzi email in copia conoscenza (CC) per ogni report inviato
 CC_EMAILS = "sabrina.tapiabarzola@humanitas.it, federico.giacchibonetta@humanitas.it"

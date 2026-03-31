@@ -38,7 +38,6 @@
       border-collapse: collapse;
       margin-bottom: 40px;
       table-layout: fixed;
-      /* <-- QUESTO È FONDAMENTALE */
     }
 
     .layout-table td.layout-cell {
@@ -46,10 +45,6 @@
       border: none;
       padding: 0;
       vertical-align: top;
-    }
-
-    .spacer-4 {
-      width: 4%;
     }
 
     .kpi-table {
@@ -170,7 +165,7 @@
   <table class="layout-table">
     <tr>
       <!-- Card 1 -->
-      <td width="22%" class="layout-cell">
+      <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
         <table class="kpi-table">
           <tr>
             <td class="kpi-value">{{ IN_CORSO }}</td>
@@ -182,10 +177,10 @@
       </td>
 
       <!-- Spazio -->
-      <td width="4%" class="layout-cell spacer-4"></td>
+      <td width="2%" class="layout-cell"></td>
 
       <!-- Card 2 -->
-      <td width="22%" class="layout-cell">
+      <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
         <table class="kpi-table">
           <tr>
             <td class="kpi-value">{{ SOSPESI }}</td>
@@ -197,10 +192,10 @@
       </td>
 
       <!-- Spazio -->
-      <td width="4%" class="layout-cell spacer-4"></td>
+      <td width="2%" class="layout-cell"></td>
 
       <!-- Card 3 -->
-      <td width="22%" class="layout-cell">
+      <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
         <table class="kpi-table">
           <tr>
             <td class="kpi-value">{{ CHIUSI }}</td>
@@ -212,16 +207,31 @@
       </td>
 
       <!-- Spazio -->
-      <td width="4%" class="layout-cell spacer-4"></td>
+      <td width="2%" class="layout-cell"></td>
 
       <!-- Card 4 -->
-      <td width="22%" class="layout-cell">
+      <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
+        <table class="kpi-table">
+          <tr>
+            <td class="kpi-value">{{ TOTALE_ODL_APERTI }}</td>
+          </tr>
+          <tr>
+            <td class="kpi-label">ODL Totali<br>presi in carico</td>
+          </tr>
+        </table>
+      </td>
+
+      <!-- Spazio -->
+      <td width="2%" class="layout-cell"></td>
+
+      <!-- Card 5 -->
+      <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
         <table class="kpi-table">
           <tr>
             <td class="kpi-value">{{ TOTALE_ODL }}</td>
           </tr>
           <tr>
-            <td class="kpi-label">ODL Totali presi in carico</td>
+            <td class="kpi-label">ODL Totali per<br>tutti gli stati</td>
           </tr>
         </table>
       </td>

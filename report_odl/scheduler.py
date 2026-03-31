@@ -24,11 +24,11 @@ from html_report import build_html_report
 from email_sender import send_report
 
 # Importazione della lista tecnici e delle credenziali API dal file di configurazione
-from config import TECNICI
-from config import API_USER, API_PASS, CC_EMAILS
+from config import TECNICI, PROFILI, API_USER, API_PASS, CC_EMAILS
 
 # Importazione delle funzioni per la generazione dei grafici
 from graph import genera_grafico_plotly, genera_grafico_torta_rdi, grafico_to_base64
+
 
 def scheduled_report_steps():
     """
@@ -44,33 +44,24 @@ def scheduled_report_steps():
     print("Scarico gli ODL per i tecnici.")
     df_all = fetch_odl_per_responsabili(API_USER, API_PASS, first_day_date, today_date)
 
-    # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
+    # 1. Scarica numero ODL per ogni tecnico tramite l'API
     print("Scarico numero ODL per i tecnici.")
     df_num_odl = fetch_numero_odl(API_USER, API_PASS, first_day_date, today_date)
 
-    # 2. Scarica le RDI in ordine crescente (le più vecchie prima)
-    print("Scarico RDI ascendenti")
-    rdi_asc = fetch_rdi(user=API_USER, password=API_PASS, limit=10, page=1, stato="creata", orderBy="asc")
+    # 2. Scarica le RDI (le chiamate ora restituiscono un dizionario diviso per profili)
+    print("Scarico RDI ascendenti (per tabelle, limit 10)")
+    rdi_asc_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10, page=1, stato="creata", orderBy="asc")
 
-    # Scarica le RDI in ordine decrescente (le più recenti prima)
-    print("Scarico RDI discendenti")
-    rdi_desc = fetch_rdi(user=API_USER, password=API_PASS, limit=10, page=1, stato="creata", orderBy="desc")
+    print("Scarico RDI discendenti (per tabelle, limit 10)")
+    rdi_desc_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10, page=1, stato="creata", orderBy="desc")
+
+    # NUOVO: 2.1 Scarica le RDI massivamente per i grafici a torta
+    print("Scarico RDI massivo per GRAFICO TORTA (limit 10000)")
+    rdi_grafico_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10000, page=1, stato="creata", orderBy="desc")
 
     # 3. Elabora i dati ODL grezzi e li organizza per tecnico
     print("Elaboro dati relativi agli ODL")
     tecnici_dict = process_data(df_all)
-
-    # 4. Elabora i dati RDI grezzi e li converte in DataFrame puliti
-    print("Elaboro i dati relativi alle RDI ascendenti")
-    df_rdi_asc = process_rdi(rdi_asc)
-
-    print("Elaboro i dati relativi alle RDI discendenti")
-    df_rdi_desc = process_rdi(rdi_desc)
-
-    # Generazione grafici RDI (crea la stringa Base64 pura)
-    print(f"Generazione grafici RDI in corso.")
-    grafico_rdi_raw = genera_grafico_torta_rdi(df_rdi_desc)
-    grafico_rdi_b64 = grafico_to_base64(grafico_rdi_raw) # <--- Ora è Base64 puro
 
     # ----------------------------------------------------
     # NUOVO: Crea una cartella "report_locali" se non esiste
@@ -96,6 +87,28 @@ def scheduled_report_steps():
         grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
         grafico_odl_b64 = grafico_to_base64(grafico_odl_raw) 
 
+        # Trova il profilo del tecnico per pescare solo le sue RDI
+        profilo_tecnico = PROFILI.get(tecnico)
+
+        # Recupera le RDI specifiche per quel profilo (per tabelle HTML)
+        rdi_asc_personali = rdi_asc_tutti.get(profilo_tecnico, []) if profilo_tecnico else []
+        rdi_desc_personali = rdi_desc_tutti.get(profilo_tecnico, []) if profilo_tecnico else []
+        
+        # Recupera le RDI specifiche per quel profilo (per Grafico a Torta)
+        rdi_grafico_personali = rdi_grafico_tutti.get(profilo_tecnico, []) if profilo_tecnico else []
+
+        print(f"[{tecnico}] Elaboro i dati relativi alle RDI (Profilo: {profilo_tecnico})")
+        df_rdi_asc = process_rdi(rdi_asc_personali)
+        df_rdi_desc = process_rdi(rdi_desc_personali)
+        
+        # Processa il DataFrame specifico e massivo per il grafico
+        df_rdi_grafico = process_rdi(rdi_grafico_personali)
+
+        # Generazione grafici RDI per lo specifico tecnico usando df_rdi_grafico
+        print(f"[{tecnico}] Generazione grafici RDI in corso.")
+        grafico_rdi_raw = genera_grafico_torta_rdi(df_rdi_grafico)
+        grafico_rdi_b64 = grafico_to_base64(grafico_rdi_raw)
+
         # Costruisce il corpo HTML del report passando le stringhe cid al posto delle stringhe base64 lunghissime
         print(f"[{tecnico}] generazione report HTML in corso.")
         html_body = build_html_report(
@@ -108,7 +121,7 @@ def scheduled_report_steps():
             grafico_rdi_b64="cid:grafico_rdi.png"  
         )
 
-                # ----------------------------------------------------
+        # ----------------------------------------------------
         # Salvataggio del file HTML locale (per debugging)
         # ----------------------------------------------------
         nome_file = f"{tecnico.replace(' ', '_')}_report.html"

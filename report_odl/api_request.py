@@ -1,9 +1,8 @@
-
 # Libreria per effettuare chiamate HTTP verso le API
 import requests
 
 # Importazione delle costanti di configurazione: endpoint API, credenziali e lista tecnici
-from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS, NUMERO_ODL_ENDPOINT
+from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS, NUMERO_ODL_ENDPOINT, PROFILI
 
 from datetime import datetime
 
@@ -182,7 +181,6 @@ def fetch_numero_odl(
         print("-" * 50)
 
         
-
     # Restituisce il dizionario completo con i dati di tutti i tecnici
     return risultati
 
@@ -209,43 +207,57 @@ def fetch_rdi(
     # Costruisce l'URL completo dell'endpoint RDI
     endpoint_url = f"{API_ENDPOINT}{RDI_ENDPOINT}"
 
-    print(f"Scaricando RDI da: {endpoint_url}")
+    risultati = {}
 
-    # Parametri da passare nell'URL della richiesta GET
-    params = {
-        "user": user,         # username per autenticazione
-        "password": password, # password per autenticazione
-        "limit": limit,       # numero massimo di record da ricevere
-        "page": page,         # numero di pagina (paginazione)
-        "stato": stato,       # filtra per stato RDI (es. "creata")
-        "orderBy": orderBy,   # ordinamento: "asc" = crescente, "desc" = decrescente
-    }
+    # Estraiamo tutti i profili unici dal dizionario PROFILI in config.py
+    # Usando set() eliminiamo i duplicati (es. avremo solo {"tecnici", "ferri", "freddo", "altro"})
+    profili_unici = set(PROFILI.values())
 
-    try:
-        # Effettua la chiamata GET all'API con i parametri costruiti sopra
-        response = requests.get(endpoint_url, params=params, timeout=10)
-        print("URL chiamata RDI:", response.url)
+    print(f"Scaricando RDI da: {endpoint_url} per i profili: {profili_unici}")
 
-        # Se la risposta è positiva (codice 200), estrae i dati JSON
-        if response.status_code == 200:
-            data = response.json()
+    # Facciamo una chiamata API per ogni PROFILO, non per ogni tecnico!
+    for profile in profili_unici:
+        print(f"Richiesta API RDI per il profilo: {profile}")
 
-            # L'API restituisce un dizionario con una chiave "recordset"
-            # che contiene la lista effettiva dei record RDI
-            if isinstance(data, dict) and "data" in data and "recordset" in data["data"]:
-                recordset = data["data"]["recordset"]
-                print(f"-> Trovati {len(recordset)} record RDI.")
-                return recordset
+        # Parametri da passare nell'URL della richiesta GET
+        params = {
+            "user": user,         # username per autenticazione
+            "password": password, # password per autenticazione
+            "limit": limit,       # numero massimo di record da ricevere
+            "page": page,         # numero di pagina (paginazione)
+            "stato": stato,       # filtra per stato RDI (es. "creata")
+            "orderBy": orderBy,   # ordinamento: "asc" = crescente, "desc" = decrescente
+            "profile": profile    # filtra per tipo di profilo del responsabile 
+        }
+
+        try:
+            # Effettua la chiamata GET all'API con i parametri costruiti sopra
+            response = requests.get(endpoint_url, params=params, timeout=10)
+            print("URL chiamata RDI:", response.url)
+
+            # Se la risposta è positiva (codice 200), estrae i dati JSON
+            if response.status_code == 200:
+                data = response.json()
+
+                # L'API restituisce un dizionario con una chiave "recordset"
+                # che contiene la lista effettiva dei record RDI
+                if isinstance(data, dict) and "data" in data and "recordset" in data["data"]:
+                    recordset = data["data"]["recordset"]
+                    print(f"-> Trovati {len(recordset)} record RDI per il profilo '{profile}'.")
+                    
+                    risultati[profile] = recordset
+                else:
+                
+                    risultati[profile] = []
             else:
-                # Se la struttura della risposta è diversa dal previsto
-                print("-> Nessun 'recordset' trovato nel JSON.")
-                return []
-        else:
-            # In caso di errore HTTP stampa il codice e il messaggio di errore
-            print(f"Errore HTTP RDI: {response.status_code} - {response.text}")
-            return []
+                # In caso di errore HTTP stampa il codice e il messaggio di errore
+                print(f"Errore HTTP RDI: {response.status_code} - {response.text}")
+                risultati[profile] = []
 
-    except requests.exceptions.RequestException as e:
-        # Gestisce errori di rete (timeout, connessione rifiutata, ecc.)
-        print(f"Errore di rete/chiamata API RDI: {e}")
-        return []
+        except requests.exceptions.RequestException as e:
+            # Gestisce errori di rete (timeout, connessione rifiutata, ecc.)
+            print(f"Errore di rete/chiamata API RDI: {e}")
+            risultati[profile] = []
+
+    
+    return risultati
