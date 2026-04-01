@@ -14,8 +14,7 @@ import os
 from api_request import fetch_numero_odl, fetch_odl_per_responsabili, fetch_rdi
 
 # Importazione delle funzioni per l'elaborazione dei dati ODL e RDI
-from processing import process_data
-from processing import process_rdi
+from processing import process_data, process_rdi, predict_next_rdi
 
 # Importazione della funzione per la costruzione del report HTML
 from html_report import build_html_report
@@ -55,9 +54,16 @@ def scheduled_report_steps():
     print("Scarico RDI discendenti (per tabelle, limit 10)")
     rdi_desc_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10, page=1, stato="creata", orderBy="desc")
 
-    # NUOVO: 2.1 Scarica le RDI massivamente per i grafici a torta
+    # 2.1 Scarica le RDI massivamente per i grafici a torta (solo RDI aperte/create)
     print("Scarico RDI massivo per GRAFICO TORTA (limit 10000)")
-    rdi_grafico_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10000, page=1, stato="creata", orderBy="desc")
+    rdi_grafico_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10000, page=1, stato="CREATA", orderBy="desc")
+
+    # NUOVO: 2.2 Scarica lo STORICO RDI (Piano B: due chiamate separate con limite 150.000)
+    print("Scarico RDI massivo per PREVISIONI GUASTI (stato: CREATA)")
+    rdi_storico_create = fetch_rdi(user=API_USER, password=API_PASS, limit=150000, page=1, stato="CREATA", orderBy="desc")
+    
+    print("Scarico RDI massivo per PREVISIONI GUASTI (stato: CHIUSA CON ODL)")
+    rdi_storico_chiuse = fetch_rdi(user=API_USER, password=API_PASS, limit=150000, page=1, stato="CHIUSA CON ODL", orderBy="desc")
 
     # 3. Elabora i dati ODL grezzi e li organizza per tecnico
     print("Elaboro dati relativi agli ODL")
@@ -96,6 +102,16 @@ def scheduled_report_steps():
         
         # Recupera le RDI specifiche per quel profilo (per Grafico a Torta)
         rdi_grafico_personali = rdi_grafico_tutti.get(profilo_tecnico, []) if profilo_tecnico else []
+        
+        # Recupera lo storico (create + chiuse) e lo unisce!
+        storico_create = rdi_storico_create.get(profilo_tecnico, []) if profilo_tecnico else []
+        storico_chiuse = rdi_storico_chiuse.get(profilo_tecnico, []) if profilo_tecnico else []
+        
+        # ECCO LA RIGA CHE MANCAVA! Questa crea la variabile rdi_storico_personali unendo le due liste
+        rdi_storico_personali = storico_create + storico_chiuse
+
+        # Stampa di controllo: vediamo quante ne ha trovate in totale
+        print(f"[{tecnico}] DEBUG STORICO: Trovate {len(rdi_storico_personali)} RDI storiche totali.")
 
         print(f"[{tecnico}] Elaboro i dati relativi alle RDI (Profilo: {profilo_tecnico})")
         df_rdi_asc = process_rdi(rdi_asc_personali)
@@ -103,6 +119,19 @@ def scheduled_report_steps():
         
         # Processa il DataFrame specifico e massivo per il grafico
         df_rdi_grafico = process_rdi(rdi_grafico_personali)
+
+        # ----------------------------------------------------
+        # NUOVO: Calcolo previsioni prossime RDI (Top 5)
+        # ----------------------------------------------------
+        # Inizializziamo un DataFrame vuoto di default per tutti i profili
+        df_previsioni = None
+        
+        # Calcoliamo le previsioni SOLO se il responsabile fa parte dei "tecnici"
+        if profilo_tecnico == "tecnici":
+            print(f"[{tecnico}] Profilo 'tecnici' rilevato: Calcolo previsioni prossimi guasti in corso.")
+            df_previsioni = predict_next_rdi(rdi_storico_personali)
+        else:
+            print(f"[{tecnico}] Profilo '{profilo_tecnico}' rilevato: Salto il calcolo delle previsioni.")
 
         # Generazione grafici RDI per lo specifico tecnico usando df_rdi_grafico
         print(f"[{tecnico}] Generazione grafici RDI in corso.")
@@ -118,7 +147,8 @@ def scheduled_report_steps():
             rdi_desc=df_rdi_desc, 
             rdi_asc=df_rdi_asc, 
             grafico_odl_b64="cid:grafico_odl.png",  
-            grafico_rdi_b64="cid:grafico_rdi.png"  
+            grafico_rdi_b64="cid:grafico_rdi.png",
+            previsioni_rdi=df_previsioni
         )
 
         # ----------------------------------------------------

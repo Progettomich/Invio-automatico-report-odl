@@ -146,6 +146,16 @@
       display: block;
       margin: 0 auto;
     }
+
+    .empty-message {
+      background-color: #f8f9fa;
+      border: 1px dashed #dcdcdc;
+      color: #666666;
+      padding: 15px;
+      text-align: center;
+      font-size: 13px;
+      font-style: italic;
+    }
   </style>
 </head>
 
@@ -351,6 +361,46 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <!-- TABELLA 4: PREVISIONI GUASTI -->
+  {% if previsioni_list and previsioni_list|length > 0 %}
+  <div class="section-title">
+    <span class="section-icon">🔮</span> Previsione Prossimi Guasti (Top 5 Apparecchi a Rischio)
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>N Inventario (ICH)</th>
+        <th>Descrizione Apparecchiatura</th>
+        <th>Data Ultimo Guasto (RDI)</th>
+        <th>Giorni Medi tra Guasti</th>
+        <th style="background-color: #085942;">Data Prevista Prossimo Guasto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for prev in previsioni_list %}
+      <tr>
+        <!-- ECCO I QUATTRO <td> CHE MANCAVANO NEL TUO CODICE: -->
+        <td style="font-weight: bold;">{{ prev.ICH }}</td>
+        <td>{{ prev.descrizione_bene }}</td>
+        <td>{{ prev.ultima_data_rdi }}</td>
+        <td>{{ prev.intervallo_medio_giorni }} gg</td>
+
+        <!-- IL TUO QUINTO <td> PER LA DATA (corretto, con lo spazio tra <td e style) -->
+        {% set oggi_iso = data_gen[6:10] + '-' + data_gen[3:5] + '-' + data_gen[0:2] %}
+        <td
+          style="font-weight: bold; color: {% if prev.data_prevista_pura < oggi_iso %}#d9534f{% else %}#0b7a5c{% endif %};">
+          {{ prev.data_prevista_prossima_rdi }}
+          {% if prev.data_prevista_pura < oggi_iso %} <br><span
+              style="font-size: 10px; color: #d9534f;">(SCADUTO)</span>
+            {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 
   <div class="footer">
     Report generato automaticamente dal MICH — Ingegneria Clinica

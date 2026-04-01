@@ -14,7 +14,8 @@ def build_html_report(
     rdi_desc: pd.DataFrame,
     rdi_asc: pd.DataFrame,
     grafico_odl_b64: str,
-    grafico_rdi_b64: str
+    grafico_rdi_b64: str,
+    previsioni_rdi: pd.DataFrame = None
 ) -> str:
     """
     Costruisce il report HTML finale per un tecnico specifico combinando dati tabellari, 
@@ -52,9 +53,40 @@ def build_html_report(
     # Sostituisce i NaN con stringhe vuote e converte il DataFrame in lista di record
     rdi_desc_list = rdi_desc.fillna("").to_dict("records")
 
-    # Prepara la lista di dizionari per la tabella delle RDI ascendenti (più vecchie)
+        # Prepara la lista di dizionari per la tabella delle RDI ascendenti (più vecchie)
     # Sostituisce i NaN con stringhe vuote e converte il DataFrame in lista di record
     rdi_asc_list = rdi_asc.fillna("").to_dict("records")
+
+    # ----------------------------------------------------
+    # NUOVO: Prepara la lista per la tabella predittiva
+    # ----------------------------------------------------
+    previsioni_list = []
+    if previsioni_rdi is not None and not previsioni_rdi.empty:
+        # 1. Creiamo una copia per non sporcare il DataFrame originale
+        df_prev = previsioni_rdi.copy()
+        
+        # 2. Rinominiamo e formattiamo in AAAA-MM-GG
+        if "data_prevista_prossima_rdi" in df_prev.columns:
+            # Questa serve per i controlli logici HTML
+            df_prev["data_prevista_pura"] = df_prev["data_prevista_prossima_rdi"].dt.strftime("%Y-%m-%d").fillna("")
+            # Questa è la data visibile all'utente formattata come Anno-Mese-Giorno
+            df_prev["data_prevista_prossima_rdi"] = df_prev["data_prevista_prossima_rdi"].dt.strftime("%Y-%m-%d").fillna("")
+            
+        if "ultima_data_rdi" in df_prev.columns:
+            # Formattiamo in Anno-Mese-Giorno
+            df_prev["ultima_data_rdi"] = df_prev["ultima_data_rdi"].dt.strftime("%Y-%m-%d").fillna("")
+            
+        # 3. Arrotonda l'intervallo medio a 1 decimale e converte in stringa
+        if "intervallo_medio_giorni" in df_prev.columns:
+            df_prev["intervallo_medio_giorni"] = df_prev["intervallo_medio_giorni"].round(1).astype(str)
+            
+        # 4. Sostituisce i NaN con spazi vuoti
+        df_prev = df_prev.fillna(" ")
+        
+        # 5. Converte in lista di dizionari (records) pronti per Jinja2
+        previsioni_list = df_prev.to_dict("records")
+        
+        print(f"DEBUG HTML: Lista previsioni creata con {len(previsioni_list)} elementi!")
 
     # Identifica il percorso assoluto della cartella corrente in cui si trova questo file Python
     cartella_corrente = os.path.dirname(os.path.abspath(__file__))
@@ -96,6 +128,7 @@ def build_html_report(
         odl_list=odl_list,
         rdi_desc_list=rdi_desc_list,
         rdi_asc_list=rdi_asc_list,
+        previsioni_list=previsioni_list
     )
 
     # Ritorna la stringa completa contenente l'intero report formattato in HTML
