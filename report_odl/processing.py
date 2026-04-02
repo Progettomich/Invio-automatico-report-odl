@@ -230,35 +230,95 @@ def predict_next_rdi(dati_rdi_massivi: list) -> pd.DataFrame:
     # 7. Filtriamo macchine inaffidabili (almeno 1 intervallo storico = 2 guasti)
     stats = stats[stats["numero_intervalli"] >= 1].copy()
 
-    # ----------------------------------------------------
-    # NUOVO FILTRO TEMPORALE: Solo previsioni FUTURE
-    # ----------------------------------------------------
-    # Prendiamo la data di oggi 
+# ============================================================
+# NUOVO: PREVISIONI PROSSIMI GUASTI (TIME TO FAILURE per FAMIGLIA DI BENE)
+# ============================================================
+def predict_next_rdi(dati_rdi_massivi: list) -> pd.DataFrame:
+    """
+    Raggruppa per DESCRIZIONE_BENE e calcola il tempo medio tra i guasti 
+    per ciascuna TIPOLOGIA di apparecchio.
+    """
+    if not dati_rdi_massivi or not isinstance(dati_rdi_massivi, list):
+        return pd.DataFrame()
+
+    df = pd.DataFrame(dati_rdi_massivi)
+
+    col_data = "DATA_RDI" if "DATA_RDI" in df.columns else None
+    col_desc = "DESCRIZIONE_BENE" if "DESCRIZIONE_BENE" in df.columns else None
+    col_inv = "N_INVENTARIO" if "N_INVENTARIO" in df.columns else "ICH" if "ICH" in df.columns else None
+
+    if not col_desc or not col_data:
+        return pd.DataFrame()
+
+    colonne_utili = [col_desc, col_data]
+    if col_inv:
+        colonne_utili.append(col_inv)
+        
+    df_pred = df[colonne_utili].copy()
+    df_pred = df_pred.rename(columns={col_desc: "descrizione_bene"})
+    
+    if col_inv:
+        df_pred = df_pred.rename(columns={col_inv: "ICH_originale"})
+    else:
+        df_pred["ICH_originale"] = "N/D"
+    
+    # Pulizia
+    df_pred = df_pred.dropna(subset=["descrizione_bene", col_data])
+    df_pred = df_pred[df_pred["descrizione_bene"].astype(str).str.strip() != ""]
+
+    df_pred[col_data] = pd.to_datetime(df_pred[col_data], errors="coerce")
+    df_pred = df_pred.dropna(subset=[col_data])
+
+    # Ordiniamo cronologicamente PER DESCRIZIONE BENE
+    df_pred = df_pred.sort_values(["descrizione_bene", col_data])
+
+    # Calcolo giorni trascorsi tra un guasto e l'altro della stessa famiglia
+    df_pred["DELTA_GIORNI"] = (
+        df_pred.groupby("descrizione_bene")[col_data]
+        .diff()
+        .dt.total_seconds() / 86400
+    )
+
+    validi = df_pred.dropna(subset=["DELTA_GIORNI"]).copy()
+
+    if validi.empty:
+        return pd.DataFrame()
+
+    # Calcolo statistiche principali
+    stats = validi.groupby("descrizione_bene").agg(
+        ultima_data_rdi=(col_data, "max"),
+        intervallo_medio_giorni=("DELTA_GIORNI", "mean"),
+        numero_intervalli=("DELTA_GIORNI", "count")
+    ).reset_index()
+
+    # Estraiamo informazioni pulite: Quante macchine ci sono? Qual è l'ultimo ICH guasto?
+    dettagli = df_pred.sort_values(col_data).groupby("descrizione_bene").agg(
+        ultimo_ich=("ICH_originale", "last"),
+        qta_macchine=("ICH_originale", "nunique")
+    ).reset_index()
+
+    stats = pd.merge(stats, dettagli, on="descrizione_bene", how="left")
+
+    # Previsione
+    stats["data_prevista_prossima_rdi"] = (
+        stats["ultima_data_rdi"] + pd.to_timedelta(stats["intervallo_medio_giorni"], unit="D")
+    )
+
+    stats = stats[stats["numero_intervalli"] >= 1].copy()
+
+    # FILTRO TEMPORALE: Solo previsioni FUTURE
     oggi = pd.Timestamp(datetime.now().date())
-    
-    # Vogliamo SOLO macchine che si romperanno da oggi in poi
-    # limite_passato = oggi (nessuna macchina già scaduta apparirà)
     limite_passato = oggi
-    
-    # limito_futuro = tra 2 anni (per prendere abbastanza macchine future)
     limite_futuro = oggi + timedelta(days=730)
     
-    # Applichiamo il filtro al DataFrame
     stats = stats[
         (stats["data_prevista_prossima_rdi"] >= limite_passato) & 
         (stats["data_prevista_prossima_rdi"] <= limite_futuro)
     ].copy()
 
-    # 8. Ordiniamo per data prevista più vicina a oggi
     stats = stats.sort_values("data_prevista_prossima_rdi", ascending=True)
-    
-    # Log di controllo
-    print(f"DEBUG PREVISIONI: Trovate {len(stats)} macchine future a rischio.")
-    
-    # 9. Estraiamo solo le Top 5 per il report
     top5 = stats.head(5).copy()
 
-    # Arrotondiamo i giorni medi a un decimale per pulizia grafica
     top5["intervallo_medio_giorni"] = top5["intervallo_medio_giorni"].round(1)
 
     return top5

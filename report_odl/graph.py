@@ -132,16 +132,27 @@ def genera_grafico_torta_rdi(df_rdi_desc):
         # Se ci sono 5 reparti o meno, li usiamo tutti senza fare "Altro"
         reparti_da_graficare = reparti_counts
 
-    # 4. ESTRAZIONE DATI PER IL GRAFICO
-    labels = reparti_da_graficare.index.tolist()   # nomi (Top 5 + "Altro")
-    values = reparti_da_graficare.values.tolist()  # conteggi assoluti corrispondenti
+    # 4. ESTRAZIONE DATI PER IL GRAFICO E TRONCAMENTO AGGRESSIVO
+    raw_labels = reparti_da_graficare.index.tolist()
+    values = reparti_da_graficare.values.tolist()
+    
+    # TRUCCO: Plotly fa la legenda su 2 colonne SOLO SE (Testo1 + Testo2) < LarghezzaGrafico.
+    # Tronchiamo in modo aggressivo a MAX 20 caratteri e usiamo "..." per indicare il taglio.
+    max_chars = 20
+    labels = []
+    for label in raw_labels:
+        if len(label) > max_chars:
+            labels.append(label[:max_chars] + "..")
+        else:
+            # Riempiamo gli spazi vuoti con spazi invisibili o lo lasciamo così
+            labels.append(label)
 
     # 5. CREAZIONE GRAFICO A TORTA
     fig = go.Figure(data=[
         go.Pie(
             labels=labels,
             values=values,
-            textinfo='percent',  # Plotly converte automaticamente i valori in percentuali visive
+            textinfo='percent',  
             insidetextorientation='radial',
             marker=dict(line=dict(color='#ffffff', width=2)) 
         )
@@ -150,18 +161,17 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     # 6. IMPOSTAZIONI LAYOUT
     fig.update_layout(
         title="Distribuzione RDI Non Presi per Reparto",
-        width=420,
-        height=550, # <-- Ho aumentato leggermente l'altezza per dare spazio alla legenda a due colonne
+        width=480,     # <-- Allarghiamo ancora a 480 per dare ulteriore respiro alle due colonne
+        height=500, 
         showlegend=True,
-        margin=dict(t=40, b=150, l=10, r=10), # <-- Ho aumentato il margine inferiore (b)
+        margin=dict(t=40, b=180, l=10, r=10), 
         legend=dict(
             orientation="h",       # Legenda orizzontale
-            yanchor="top",
-            y=-0.1,                # Sposta la legenda sotto il grafico
-            xanchor="center",
-            x=0.5,
-            font=dict(size=9),     # Carattere leggermente più piccolo per far stare tutto
-            itemwidth=30,          # Larghezza fissa per forzare le colonne
+            yanchor="top", 
+            y=-0.1,                # Posizionata sotto la torta
+            xanchor="center", 
+            x=0.5, 
+            font=dict(size=9), 
             traceorder="normal"
         )
     )

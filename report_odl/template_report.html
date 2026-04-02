@@ -277,12 +277,12 @@
     <thead>
       <tr>
         <th>ID ODL</th>
-        <th>Data ODL</th>
-        <th>Giorni Trascorsi</th>
-        <th>Stato</th>
-        <th>Descrizione ODL</th>
-        <th>Causa sospensione</th>
-        <th>Descrizione bene</th>
+        <th>DATA ODL</th>
+        <th>GIORNI TRASCORSI</th>
+        <th>STATO ODL</th>
+        <th>DESCRIZIONE ODL</th>
+        <th>CAUSA SOSPENSIONE</th>
+        <th>DESCRIZIONE BENE</th>
       </tr>
     </thead>
     <tbody>
@@ -290,7 +290,7 @@
       <tr>
         <td>{{ odl.id_odl }}</td>
         <td>{{ odl.data_odl }}</td>
-        <td>{{ odl.giorni_trascorsi }}</td>
+        <td>{{ odl.giorni_trascorsi }} gg</td>
         <td>{{ odl.stato_odl }}</td>
         <td>{{ odl.descrizione_odl }}</td>
         <td>{{ odl.causa_sospensione }}</td>
@@ -322,7 +322,7 @@
         <td>{{ rdi.N_RDI }}</td>
         <td>{{ rdi.DATA_RDI }}</td>
         <td>{{ rdi.DESCRIZIONE_RDI }}</td>
-        <td>{{ rdi.APERTA_DA }}</td>
+        <td>{{ rdi.APERTA_DA }} gg</td>
         <td>{{ rdi.DESCRIZIONE_BENE }}</td>
         <td>{{ rdi.ICH }}</td>
         <td>{{ rdi.REPARTO }}</td>
@@ -353,7 +353,7 @@
         <td>{{ rdi.N_RDI }}</td>
         <td>{{ rdi.DATA_RDI }}</td>
         <td>{{ rdi.DESCRIZIONE_RDI }}</td>
-        <td>{{ rdi.APERTA_DA }}</td>
+        <td>{{ rdi.APERTA_DA }} gg</td>
         <td>{{ rdi.DESCRIZIONE_BENE }}</td>
         <td>{{ rdi.ICH }}</td>
         <td>{{ rdi.REPARTO }}</td>
@@ -367,41 +367,32 @@
   <div class="section-title">
     <span class="section-icon">🔮</span> Previsione Prossimi Guasti (Top 5 Apparecchi a Rischio)
   </div>
-
   <table class="data-table">
     <thead>
       <tr>
-        <th>N Inventario (ICH)</th>
-        <th>Descrizione Apparecchiatura</th>
-        <th>Data Ultimo Guasto (RDI)</th>
-        <th>Giorni Medi tra Guasti</th>
-        <th style="background-color: #085942;">Data Prevista Prossimo Guasto</th>
+        <th>MODELLO</th>
+        <th>Q.TÀ APP.</th>
+        <th>ULTIMO GUASTO</th>
+        <th>GIORNI MEDI TRA GUASTI</th>
+        <th>DATA PREVISTA PROSSIMO GUASTO</th>
       </tr>
     </thead>
     <tbody>
       {% for prev in previsioni_list %}
       <tr>
-        <!-- ECCO I QUATTRO <td> CHE MANCAVANO NEL TUO CODICE: -->
-        <td style="font-weight: bold;">{{ prev.ICH }}</td>
-        <td>{{ prev.descrizione_bene }}</td>
-        <td>{{ prev.ultima_data_rdi }}</td>
-        <td>{{ prev.intervallo_medio_giorni }} gg</td>
-
-        <!-- IL TUO QUINTO <td> PER LA DATA (corretto, con lo spazio tra <td e style) -->
-        {% set oggi_iso = data_gen[6:10] + '-' + data_gen[3:5] + '-' + data_gen[0:2] %}
-        <td
-          style="font-weight: bold; color: {% if prev.data_prevista_pura < oggi_iso %}#d9534f{% else %}#0b7a5c{% endif %};">
-          {{ prev.data_prevista_prossima_rdi }}
-          {% if prev.data_prevista_pura < oggi_iso %} <br><span
-              style="font-size: 10px; color: #d9534f;">(SCADUTO)</span>
-            {% endif %}
+        <td><b>{{ prev.descrizione_bene }}</b></td>
+        <td>{{ prev.qta_macchine }}</td>
+        <td>
+          ICH: {{ prev.ultimo_ich }}<br>
+          (il {{ prev.ultima_data_rdi }})
         </td>
+        <td>{{ prev.intervallo_medio_giorni }} gg</td>
+        <td><b>{{ prev.data_prevista_prossima_rdi }}</b></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% endif %}
-
   <div class="footer">
     Report generato automaticamente dal MICH — Ingegneria Clinica
   </div>
