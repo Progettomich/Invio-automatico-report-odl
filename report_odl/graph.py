@@ -70,7 +70,7 @@ def genera_grafico_plotly(dati_conteggio_api):
         )
     ])
 
-    # 6. Impostazioni del layout
+     # 6. Impostazioni del layout (GRAFICO A BARRE)
     fig.update_layout(
         title="Distribuzione degli ODL per stato",
         xaxis=dict(
@@ -82,9 +82,10 @@ def genera_grafico_plotly(dati_conteggio_api):
             range=[0, max(counts_ordinati) * 1.2 if counts_ordinati and max(counts_ordinati) > 0 else 5]
         ),
         width=420,
-        height=450,
-        margin=dict(l=40, r=20, t=40, b=120),
-        font=dict(family="Arial", size=11)
+        height=500,                            # <-- Stessa altezza del grafico a torta! (era 450)
+        margin=dict(l=40, r=20, t=40, b=180),  # <-- Margine inferiore allineato (era 120)
+        font=dict(family="Arial", size=11),
+        plot_bgcolor='#f4f7fb',                # Colore di sfondo opzionale per uniformità visiva
     )
 
     return fig
@@ -113,7 +114,7 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     reparti_counts = df_rdi_desc[colonna_reparto].fillna("Sconosciuto").value_counts()
 
     # 3. FILTRO "TOP 5" E RAGGRUPPAMENTO "ALTRO"
-    numero_massimo_fette = 5
+    numero_massimo_fette = 10
 
     # Controlla se abbiamo più di 5 reparti totali
     if len(reparti_counts) > numero_massimo_fette:
@@ -150,17 +151,18 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     fig.update_layout(
         title="Distribuzione RDI Non Presi per Reparto",
         width=420,
-        height=450,
+        height=550, # <-- Ho aumentato leggermente l'altezza per dare spazio alla legenda a due colonne
         showlegend=True,
-        # Margini sistemati per una torta pulita e centrata
-        margin=dict(t=40, b=120, l=10, r=10), 
+        margin=dict(t=40, b=150, l=10, r=10), # <-- Ho aumentato il margine inferiore (b)
         legend=dict(
-            orientation="h", 
-            yanchor="top", 
-            y=-0.05, 
-            xanchor="center", 
-            x=0.5, 
-            font=dict(size=10)
+            orientation="h",       # Legenda orizzontale
+            yanchor="top",
+            y=-0.1,                # Sposta la legenda sotto il grafico
+            xanchor="center",
+            x=0.5,
+            font=dict(size=9),     # Carattere leggermente più piccolo per far stare tutto
+            itemwidth=30,          # Larghezza fissa per forzare le colonne
+            traceorder="normal"
         )
     )
     return fig
