@@ -70,9 +70,13 @@ def genera_grafico_plotly(dati_conteggio_api):
         )
     ])
 
-     # 6. Impostazioni del layout (GRAFICO A BARRE)
+    # 6. Impostazioni del layout (GRAFICO A BARRE)
     fig.update_layout(
-        title="Distribuzione degli ODL per stato",
+        title=dict(
+            text="Distribuzione degli ODL per stato",
+            x=0.5,           # Posiziona al centro (50% della larghezza)
+            xanchor='center' # Assicura che l'ancoraggio sia centrale
+        ),
         xaxis=dict(
             title="Stato ODL",
             type='category' # Forza l'asse a testo per evitare vuoti
@@ -160,7 +164,11 @@ def genera_grafico_torta_rdi(df_rdi_desc):
 
     # 6. IMPOSTAZIONI LAYOUT
     fig.update_layout(
-        title="Distribuzione RDI Non Presi per Reparto",
+        title=dict(
+            text="Distribuzione RDI Non Presi per Reparto",
+            x=0.5,
+            xanchor='center'
+        ),
         width=480,     # <-- Allarghiamo ancora a 480 per dare ulteriore respiro alle due colonne
         height=500, 
         showlegend=True,
