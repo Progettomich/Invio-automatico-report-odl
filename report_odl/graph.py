@@ -10,6 +10,9 @@ import base64
 # Libreria per gestire i dati binari in memoria senza salvare su disco
 from io import BytesIO
 
+# Libreria per gestire le date (utile per il grafico YTD)
+import datetime
+
 # Dizionario che associa ogni stato ODL al suo colore nel grafico
 # I colori sono in formato esadecimale
 COLOR_MAP = {
@@ -21,7 +24,6 @@ COLOR_MAP = {
 
 # Ordine fisso con cui gli stati vengono mostrati nel grafico a barre
 ORDINE_STATI = ["CONCLUSO", "SOSPESO", "IN CORSO", "DA FARE"]
-
 
 # ============================================================
 # GRAFICO A BARRE — Distribuzione ODL per stato
@@ -86,14 +88,13 @@ def genera_grafico_plotly(dati_conteggio_api):
             range=[0, max(counts_ordinati) * 1.2 if counts_ordinati and max(counts_ordinati) > 0 else 5]
         ),
         width=420,
-        height=500,                            # <-- Stessa altezza del grafico a torta! (era 450)
-        margin=dict(l=40, r=20, t=40, b=180),  # <-- Margine inferiore allineato (era 120)
+        height=500,                            # <-- Stessa altezza del grafico a torta!
+        margin=dict(l=40, r=20, t=40, b=180),  # <-- Margine inferiore allineato
         font=dict(family="Arial", size=11),
         plot_bgcolor='#f4f7fb',                # Colore di sfondo opzionale per uniformità visiva
     )
 
     return fig
-
 
 # ============================================================
 # GRAFICO A TORTA — Distribuzione RDI per reparto
@@ -185,6 +186,95 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     )
     return fig
 
+
+
+# ============================================================
+# GRAFICO 4: CIAMBELLA — Distribuzione RDI per Apparecchiatura
+# ============================================================
+def genera_grafico_torta_apparecchiature(df_rdi_storico):
+    """
+    Genera un grafico a ciambella che mostra quali classi di apparecchiature 
+    generano più RDI storicamente. I beni senza nome vengono raggruppati in "GENERICHE".
+    Mostra le top 7, il resto va in 'Altre Apparecchiature'.
+    """
+    colonna_bene = "CLASSE" 
+
+    # 1. Sicurezza: Se il DataFrame è vuoto o la colonna non esiste
+    if df_rdi_storico is None or df_rdi_storico.empty or colonna_bene not in df_rdi_storico.columns:
+        fig = go.Figure()
+        fig.update_layout(title="Nessun dato apparecchiature disponibile", width=480, height=500)
+        return fig
+
+    # 2. PULIZIA DATI: Trasformiamo in "GENERICHE" tutto ciò che è nullo, vuoto o "NULL"
+    df_pulito = df_rdi_storico.copy()
+    
+    # Rimuovi spazi bianchi all'inizio e alla fine
+    df_pulito[colonna_bene] = df_pulito[colonna_bene].astype(str).str.strip()
+    
+    # Sostituiamo i vari casi invalidi con "GENERICHE"
+    casi_invalidi = ["", "nan", "NAN", "null", "NULL", "None", "Sconosciuto"]
+    df_pulito.loc[df_pulito[colonna_bene].isin(casi_invalidi), colonna_bene] = "GENERICHE"
+
+    # 3. CONTEGGIO
+    beni_counts = df_pulito[colonna_bene].value_counts()
+
+    # 4. FILTRO TOP 7 + "Altre Apparecchiature"
+    numero_massimo_fette = 7
+
+    if len(beni_counts) > numero_massimo_fette:
+        # Prendi i primi 7
+        top_beni = beni_counts.head(numero_massimo_fette)
+        # Somma tutti gli altri
+        somma_altri = beni_counts.iloc[numero_massimo_fette:].sum()
+        
+        # Aggiungi la fetta degli "altri"
+        top_beni["Altre Apparecchiature"] = somma_altri
+        beni_da_graficare = top_beni
+    else:
+        beni_da_graficare = beni_counts
+
+    raw_labels = beni_da_graficare.index.tolist()
+    values = beni_da_graficare.values.tolist()
+    
+    # 5. TRONCAMENTO AGGRESSIVO PER LA LEGENDA (max 22 caratteri)
+    max_chars = 22
+    labels = [(l[:max_chars] + "..") if len(str(l)) > max_chars else str(l) for l in raw_labels]
+
+    # 6. CREAZIONE GRAFICO A CIAMBELLA
+    fig = go.Figure(data=[
+        go.Pie(
+            labels=labels,
+            values=values,
+            textinfo='percent',  
+            hole=0.3,  # <-- Effetto Donut!
+            insidetextorientation='radial',
+            marker=dict(line=dict(color='#ffffff', width=2)) 
+        )
+    ])
+
+    # 7. IMPOSTAZIONI LAYOUT
+    fig.update_layout(
+        title=dict(
+            text="Top Apparecchiature più guaste",
+            x=0.5,
+            xanchor='center'
+        ),
+        width=480,     
+        height=500, 
+        showlegend=True,
+        margin=dict(t=40, b=180, l=10, r=10),  # <-- Margine inferiore a 180
+        legend=dict(
+            orientation="h",       
+            yanchor="top", 
+            y=-0.1,                
+            xanchor="center", 
+            x=0.5, 
+            font=dict(size=9), 
+            traceorder="normal"
+            # (Nessun entrywidth o forzatura delle colonne qui)
+        )
+    )
+    return fig
 
 # ============================================================
 # CONVERSIONE GRAFICO IN BASE64

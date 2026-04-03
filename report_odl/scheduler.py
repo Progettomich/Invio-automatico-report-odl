@@ -5,7 +5,7 @@ import schedule
 import time
 
 # Libreria per lavorare con date e ore
-from datetime import date, datetime
+from datetime import datetime
 
 # Libreria per gestire i percorsi dei file
 import os
@@ -13,7 +13,7 @@ import os
 # Importazione delle funzioni per il recupero dei dati dall'API
 from api_request import fetch_numero_odl, fetch_odl_per_responsabili, fetch_rdi
 
-# Importazione delle funzioni per l'elaborazione dei dati ODL e RDI
+# Importazione delle funzioni per l'elaborazione dei dati
 from processing import process_data, process_rdi, predict_next_rdi
 
 # Importazione della funzione per la costruzione del report HTML
@@ -26,8 +26,7 @@ from email_sender import send_report
 from config import TECNICI, PROFILI, API_USER, API_PASS, CC_EMAILS
 
 # Importazione delle funzioni per la generazione dei grafici
-from graph import genera_grafico_plotly, genera_grafico_torta_rdi, grafico_to_base64
-
+from graph import genera_grafico_plotly, genera_grafico_torta_rdi, genera_grafico_torta_apparecchiature, grafico_to_base64
 
 def scheduled_report_steps():
     """
@@ -37,7 +36,7 @@ def scheduled_report_steps():
     print("Esecuzione funzione Run Weekly Report iniziata.")
 
     today_date = datetime.today().strftime('%Y-%m-%d')
-    first_day_date = f"{date.today().year}-01-01"
+    first_day_date = f"{datetime.today().year}-01-01"
 
     # 1. Scarica tutti gli ODL per ogni tecnico tramite l'API
     print("Scarico gli ODL per i tecnici.")
@@ -88,7 +87,7 @@ def scheduled_report_steps():
 
         num_odl_tecnico = df_num_odl.get(tecnico)
 
-        # Generazione grafico ODL (crea la stringa Base64 pura)
+        # Generazione grafico ODL
         print(f"[{tecnico}] generazione grafico ODL in corso.")
         grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
         grafico_odl_b64 = grafico_to_base64(grafico_odl_raw) 
@@ -107,7 +106,6 @@ def scheduled_report_steps():
         storico_create = rdi_storico_create.get(profilo_tecnico, []) if profilo_tecnico else []
         storico_chiuse = rdi_storico_chiuse.get(profilo_tecnico, []) if profilo_tecnico else []
         
-        # ECCO LA RIGA CHE MANCAVA! Questa crea la variabile rdi_storico_personali unendo le due liste
         rdi_storico_personali = storico_create + storico_chiuse
 
         # Stampa di controllo: vediamo quante ne ha trovate in totale
@@ -120,25 +118,31 @@ def scheduled_report_steps():
         # Processa il DataFrame specifico e massivo per il grafico
         df_rdi_grafico = process_rdi(rdi_grafico_personali)
 
+        # Processa lo storico completo per le classi per le apparecchiature
+        df_rdi_storico = process_rdi(rdi_storico_personali)
+
         # ----------------------------------------------------
         # NUOVO: Calcolo previsioni prossime RDI (Top 5)
         # ----------------------------------------------------
-        # Inizializziamo un DataFrame vuoto di default per tutti i profili
         df_previsioni = None
         
-        # Calcoliamo le previsioni SOLO se il responsabile fa parte dei "tecnici"
         if profilo_tecnico == "tecnici":
             print(f"[{tecnico}] Profilo 'tecnici' rilevato: Calcolo previsioni prossimi guasti in corso.")
             df_previsioni = predict_next_rdi(rdi_storico_personali)
         else:
             print(f"[{tecnico}] Profilo '{profilo_tecnico}' rilevato: Salto il calcolo delle previsioni.")
+        
+        # Generazione grafico classe apparecchiature
+        print(f"[{tecnico}] Generazione grafico apparecchiature in corso.")
+        grafico_app_raw = genera_grafico_torta_apparecchiature(df_rdi_storico)
+        grafico_app_b64 = grafico_to_base64(grafico_app_raw)
 
-        # Generazione grafici RDI per lo specifico tecnico usando df_rdi_grafico
+        # Generazione grafici RDI per lo specifico tecnico
         print(f"[{tecnico}] Generazione grafici RDI in corso.")
         grafico_rdi_raw = genera_grafico_torta_rdi(df_rdi_grafico)
         grafico_rdi_b64 = grafico_to_base64(grafico_rdi_raw)
 
-        # Costruisce il corpo HTML del report passando le stringhe cid al posto delle stringhe base64 lunghissime
+        # Costruisce il corpo HTML del report
         print(f"[{tecnico}] generazione report HTML in corso.")
         html_body = build_html_report(
             nome_tecnico=tecnico, 
@@ -148,6 +152,7 @@ def scheduled_report_steps():
             rdi_asc=df_rdi_asc, 
             grafico_odl_b64="cid:grafico_odl.png",  
             grafico_rdi_b64="cid:grafico_rdi.png",
+            grafico_app_b64="cid:grafico_app.png",
             previsioni_rdi=df_previsioni
         )
 
@@ -157,67 +162,65 @@ def scheduled_report_steps():
         nome_file = f"{tecnico.replace(' ', '_')}_report.html"
         percorso_file = os.path.join(output_dir, nome_file)
         
-        # Sostituiamo i riferimenti 'cid:' con le stringhe Base64 complete per la visualizzazione offline nel browser
         html_locale = html_body.replace(
             "cid:grafico_odl.png", 
             f"data:image/png;base64,{grafico_odl_b64}"
         ).replace(
             "cid:grafico_rdi.png", 
             f"data:image/png;base64,{grafico_rdi_b64}"
+        ).replace(
+            "cid:grafico_app.png", 
+            f"data:image/png;base64,{grafico_app_b64}"
         )
         
-        # Salviamo la versione modificata (html_locale) e non html_body
         with open(percorso_file, "w", encoding="utf-8") as file_html:
             file_html.write(html_locale)
         print(f"[{tecnico}] Report salvato in locale con grafici visibili in: {percorso_file}")
 
         # ----------------------------------------------------
-        # MODIFICA: Preparazione della lista allegati
+        # Preparazione della lista allegati
         # ----------------------------------------------------
         miei_allegati = [
             {
                 "filename": "grafico_odl.png",
                 "content": grafico_odl_b64,
                 "encoding": "base64",
-                "cid": "grafico_odl.png"  # Collega l'allegato al tag HTML <img src="cid:grafico_odl.png">
+                "cid": "grafico_odl.png"
             },
             {
                 "filename": "grafico_rdi.png",
                 "content": grafico_rdi_b64,
                 "encoding": "base64",
-                "cid": "grafico_rdi.png"  # Collega l'allegato al tag HTML <img src="cid:grafico_rdi.png">
+                "cid": "grafico_rdi.png"
+            },
+            {
+                "filename": "grafico_app.png",
+                "content": grafico_app_b64,
+                "encoding": "base64",
+                "cid": "grafico_app.png"
             }
         ]
 
-        # Invia il report all'email del tecnico includendo gli allegati
+        # Invia il report all'email
         print(f"[{tecnico}] Report e grafici creati: invio email in corso.")
         send_report(
             nome_tecnico=tecnico, 
             email_destinatario=email_dest, 
             email_cc=CC_EMAILS, 
             html_body=html_body,
-            allegati=miei_allegati # <-- Passiamo l'array di allegati
+            allegati=miei_allegati
         )
 
 def schedule_report():
-    """
-    Schedula l'esecuzione automatica della funzione scheduled_report_steps().
-    """
-
-    # --- MODALITÀ TEST: esegue ogni minuto per verificare il funzionamento ---
+    """Schedula l'esecuzione automatica."""
     schedule.every(1).minutes.do(scheduled_report_steps)
-
-     # --- MODALITÀ PRODUZIONE: ogni lunedì alle 08:00 ---
-    # Decommentare quando il codice è pronto e commentare la riga sopra
     # schedule.every().monday.at("08:00").do(scheduled_report_steps)
-
     print(f"[{datetime.now()}] Scheduler avviato: report automatici attivi")
 
     while True:
         schedule.run_pending()
         time.sleep(30)
 
-# Avvio manuale per test
 if __name__ == "__main__":
     print("Avvio manuale per TEST immediato...")
-    scheduled_report_steps() # <-- Chiamiamo direttamente la funzione per fare un test istantaneo, invece di aspettare il minuto
+    scheduled_report_steps()

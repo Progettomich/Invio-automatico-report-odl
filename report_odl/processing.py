@@ -27,7 +27,8 @@ COLONNE_OUTPUT_RDI = [
     "APERTA_DA",        # nome di chi ha aperto la RDI
     "DESCRIZIONE_BENE", # descrizione del bene coinvolto
     "ICH",              # numero inventario del bene
-    "REPARTO"           # reparto che ha aperto la RDI (usato anche nel grafico a torta)
+    "REPARTO",           # reparto che ha aperto la RDI (usato anche nel grafico a torta)
+    "CLASSE"
 ]
 
 # ============================================================
@@ -121,7 +122,8 @@ def process_rdi(dati_rdi: list) -> pd.DataFrame:
         "APERTA DA":         "APERTA_DA",       # nota: il nome originale ha uno spazio
         "DESCRIZIONE_BENE":  "DESCRIZIONE_BENE",
         "N_INVENTARIO":       "ICH",             # numero inventario rinominato in ICH
-        "REPARTO":           "REPARTO"          # usato anche nel grafico a torta
+        "REPARTO":           "REPARTO",        # usato anche nel grafico a torta
+        "CLASSE":             "CLASSE"          # colonna per la classe di apparecchiatura
     }
     df = df.rename(columns=mappa_rinomina)
 
@@ -140,98 +142,7 @@ def process_rdi(dati_rdi: list) -> pd.DataFrame:
     return df
 
 # ============================================================
-# NUOVO: PREVISIONI PROSSIMI GUASTI (TIME TO FAILURE)
-# ============================================================
-def predict_next_rdi(dati_rdi_massivi: list) -> pd.DataFrame:
-    """
-    Riceve la lista globale degli RDI (quella da 10000 record), isola N_INVENTARIO
-    e DATA_RDI, calcola il tempo medio tra i guasti per ciascun inventario
-    e restituisce i top 5 apparecchi che statisticamente si guasteranno prima.
-    """
-    if not dati_rdi_massivi or not isinstance(dati_rdi_massivi, list):
-        # Se non ci sono dati, ritorna un DataFrame vuoto con le colonne attese
-        return pd.DataFrame(columns=[
-            "ICH", "descrizione_bene", "ultima_data_rdi", 
-            "intervallo_medio_giorni", "data_prevista_prossima_rdi", "numero_intervalli"
-        ])
-
-    df = pd.DataFrame(dati_rdi_massivi)
-
-    # Verifichiamo che esistano le colonne che ci servono.
-    # L'API chiama l'inventario "N_INVENTARIO", ma controlliamo anche "ICH" nel caso
-    # siano già stati rinominati. Lo stesso per la descrizione.
-    col_inv = "N_INVENTARIO" if "N_INVENTARIO" in df.columns else "ICH" if "ICH" in df.columns else None
-    col_data = "DATA_RDI" if "DATA_RDI" in df.columns else None
-    col_desc = "DESCRIZIONE_BENE" if "DESCRIZIONE_BENE" in df.columns else None
-
-    # Se mancano le colonne chiave, non possiamo fare previsioni
-    if not col_inv or not col_data:
-        print("Impossibile calcolare previsioni: mancano le colonne N_INVENTARIO o DATA_RDI.")
-        return pd.DataFrame()
-
-    # Prepariamo un dataframe pulito solo per le previsioni
-    colonne_utili = [col_inv, col_data]
-    if col_desc:
-        colonne_utili.append(col_desc)
-        
-    df_pred = df[colonne_utili].copy()
-
-    # Rinominiamo l'inventario in ICH per coerenza con il resto del report
-    df_pred = df_pred.rename(columns={col_inv: "ICH"})
-    
-    # 1. Pulizia: rimuoviamo righe senza inventario o senza data
-    df_pred = df_pred.dropna(subset=["ICH", col_data])
-    # Togliamo spazi vuoti e inventari nulli/generici
-    df_pred = df_pred[df_pred["ICH"].astype(str).str.strip() != ""]
-    df_pred = df_pred[~df_pred["ICH"].astype(str).str.upper().isin(["NESSUNO", "NULL", "NAN", "0"])]
-
-    # 2. Conversione data
-    df_pred[col_data] = pd.to_datetime(df_pred[col_data], errors="coerce")
-    df_pred = df_pred.dropna(subset=[col_data])
-
-    # 3. Ordiniamo cronologicamente
-    df_pred = df_pred.sort_values(["ICH", col_data])
-
-    # 4. Magia Pandas: calcolo giorni trascorsi tra un guasto (RDI) e il successivo
-    df_pred["DELTA_GIORNI"] = (
-        df_pred.groupby("ICH")[col_data]
-        .diff()
-        .dt.total_seconds() / 86400  # Convertiamo i secondi in giorni (60*60*24 = 86400)
-    )
-
-    # Scartiamo le prime richieste di ogni macchina (che hanno delta NaN perché non c'è una data precedente)
-    validi = df_pred.dropna(subset=["DELTA_GIORNI"]).copy()
-
-    # Se non abbiamo storici doppi, usciamo
-    if validi.empty:
-        return pd.DataFrame()
-
-    # 5. Calcolo statistiche per ogni inventario
-    stats = validi.groupby("ICH").agg(
-        ultima_data_rdi=(col_data, "max"),
-        intervallo_medio_giorni=("DELTA_GIORNI", "mean"),
-        numero_intervalli=("DELTA_GIORNI", "count")
-    ).reset_index()
-
-    # Se abbiamo la descrizione bene, la recuperiamo dal dataframe originale e la uniamo
-    if col_desc:
-        # Prendiamo la descrizione più recente per ogni inventario
-        desc_map = df_pred.sort_values(col_data).drop_duplicates("ICH", keep="last")[["ICH", col_desc]]
-        desc_map = desc_map.rename(columns={col_desc: "descrizione_bene"})
-        stats = pd.merge(stats, desc_map, on="ICH", how="left")
-    else:
-        stats["descrizione_bene"] = "Non disponibile"
-
-    # 6. Previsione: aggiungiamo i giorni medi all'ultima data
-    stats["data_prevista_prossima_rdi"] = (
-        stats["ultima_data_rdi"] + pd.to_timedelta(stats["intervallo_medio_giorni"], unit="D")
-    )
-
-    # 7. Filtriamo macchine inaffidabili (almeno 1 intervallo storico = 2 guasti)
-    stats = stats[stats["numero_intervalli"] >= 1].copy()
-
-# ============================================================
-# NUOVO: PREVISIONI PROSSIMI GUASTI (TIME TO FAILURE per FAMIGLIA DI BENE)
+# PREVISIONI PROSSIMI GUASTI (TIME TO FAILURE per FAMIGLIA DI BENE)
 # ============================================================
 def predict_next_rdi(dati_rdi_massivi: list) -> pd.DataFrame:
     """

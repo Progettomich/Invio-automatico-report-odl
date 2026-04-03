@@ -15,6 +15,7 @@ def build_html_report(
     rdi_asc: pd.DataFrame,
     grafico_odl_b64: str,
     grafico_rdi_b64: str,
+    grafico_app_b64: str,
     previsioni_rdi: pd.DataFrame = None
 ) -> str:
     """
@@ -23,7 +24,6 @@ def build_html_report(
     """
 
     print(f"Costruzione report HTML per il tecnico: {nome_tecnico}")
-
 
     # Prepara la lista di dizionari per la tabella ODL nel template HTML
     odl_list = (
@@ -53,12 +53,12 @@ def build_html_report(
     # Sostituisce i NaN con stringhe vuote e converte il DataFrame in lista di record
     rdi_desc_list = rdi_desc.fillna("").to_dict("records")
 
-        # Prepara la lista di dizionari per la tabella delle RDI ascendenti (più vecchie)
+    # Prepara la lista di dizionari per la tabella delle RDI ascendenti (più vecchie)
     # Sostituisce i NaN con stringhe vuote e converte il DataFrame in lista di record
     rdi_asc_list = rdi_asc.fillna("").to_dict("records")
 
     # ----------------------------------------------------
-    # NUOVO: Prepara la lista per la tabella predittiva
+    # Prepara la lista per la tabella predittiva
     # ----------------------------------------------------
     previsioni_list = []
     if previsioni_rdi is not None and not previsioni_rdi.empty:
@@ -103,7 +103,7 @@ def build_html_report(
     ODL_TOTALE_APERTI=numero_odl.get("TOTALE_ODL_APERTI", 0)
     ODL_TOTALE_ODL=numero_odl.get("TOTALE_ODL", 0)
 
-    print(f"DEBUG: {ODL_IN_CORSO} ODL in corso, {ODL_SOSPESI} ODL sospesi, {ODL_CHIUSI} ODL chiusi, {ODL_TOTALE_APERTI} ODL totali, {ODL_TOTALE_ODL} ODL totali per tutti gli stati."),
+    print(f"DEBUG: {ODL_IN_CORSO} ODL in corso, {ODL_SOSPESI} ODL sospesi, {ODL_CHIUSI} ODL chiusi, {ODL_TOTALE_APERTI} ODL totali, {ODL_TOTALE_ODL} ODL totali per tutti gli stati.")
 
     # Inietta tutte le variabili e le liste calcolate all'interno del template HTML
     # La funzione .render() andrà a sostituire tutte le parentesi graffe {{ ... }} del file HTML
@@ -120,9 +120,10 @@ def build_html_report(
         TOTALE_ODL_APERTI=ODL_TOTALE_APERTI,
         TOTALE_ODL=ODL_TOTALE_ODL,
         
-        # Immagini dei grafici passate sotto forma di stringhe codificate in Base64
+        # Immagini dei grafici passate sotto forma di stringhe codificate in Base64/CID
         grafico_base64_odl=grafico_odl_b64,
         grafico_base64_rdi=grafico_rdi_b64,
+        grafico_base64_app=grafico_app_b64,
         
         # Liste di dati passate al template per popolare dinamicamente le righe delle tabelle
         odl_list=odl_list,
