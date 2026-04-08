@@ -172,7 +172,7 @@ def genera_grafico_torta_rdi(df_rdi_desc):
             x=0.5,
             xanchor='center'
         ),
-        width=480,     # <-- Allarghiamo ancora a 480 per dare ulteriore respiro alle due colonne
+        width=420,     # <-- Allarghiamo ancora a 480 per dare ulteriore respiro alle due colonne
         height=500, 
         showlegend=True,
         margin=dict(t=40, b=180, l=10, r=10), 
@@ -257,11 +257,11 @@ def genera_grafico_torta_apparecchiature(df_rdi_storico):
     # 7. IMPOSTAZIONI LAYOUT
     fig.update_layout(
         title=dict(
-            text="Top Apparecchiature più guaste",
+            text="Top Apparecchiature guaste",
             x=0.5,
             xanchor='center'
         ),
-        width=480,     
+        width=420,     
         height=500, 
         showlegend=True,
         margin=dict(t=40, b=180, l=10, r=10),  # <-- Margine inferiore a 180

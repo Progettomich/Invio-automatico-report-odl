@@ -134,16 +134,23 @@
 
     .chart-box {
       text-align: center;
-      background-color: #fcfcfc;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #eeeeee;
+      background-color: #ffffff;
+      /* Sfondo bianco, uguale a quello di Plotly */
+      padding: 0px;
+      /* AZZERATO: Nessuno spazio tra il bordo e l'immagine */
+      border-radius: 4px;
+      /* Arrotondamento molto leggero */
+      border: 1px solid #e0e0e0;
+      /* Bordo grigio chiarissimo e sottile */
+      overflow: hidden;
+      /* Taglia gli angoli dell'immagine se escono dal bordo */
     }
 
     .chart-box img {
       max-width: 100%;
       height: auto;
       display: block;
+      /* Rimuove lo spazio invisibile che l'HTML aggiunge sotto le immagini */
       margin: 0 auto;
     }
 
@@ -248,55 +255,56 @@
     </tr>
   </table>
 
-  <!-- SEZIONE GRAFICI AFFIANCATI (Layout Tabella per Outlook) -->
+  <!-- SEZIONE GRAFICI AFFIANCATI (Layout Tabella a 3 colonne fisse) -->
   <div class="section-title"><span class="section-icon">📊</span> Analisi Visiva ODL e RDI</div>
-  <table class="layout-table">
-    <tr>
-      <!-- GRAFICO A BARRE -->
-      <td width="48%" class="layout-cell">
-        <div class="chart-box">
-          <img src="{{ grafico_base64_odl }}" alt="Grafico ODL">
-        </div>
-      </td>
-      <!-- Spazio -->
-      <td class="layout-cell spacer-4"></td>
-      <!-- GRAFICO A TORTA -->
-      <td width="48%" class="layout-cell">
-        <div class="chart-box">
-          <img src="{{ grafico_base64_rdi }}" alt="Grafico RDI">
-        </div>
-      </td>
-    </tr>
-    <!-- SPAZIO VERTICALE TRA LE DUE RIGHE -->
-    <tr>
-      <td colspan="3" style="height: 20px;"></td>
-    </tr>
 
-    <!-- SECONDA RIGA: 4° Grafico (Vuoto) e Area YTD -->
-    <tr>
-      <!-- GRAFICO A CIAMBELLA (Apparecchiature) -->
-      <td width="48%" class="layout-cell">
-        <div class="chart-box">
-          <img src="{{ grafico_base64_app }}" alt="Grafico Apparecchiature">
-        </div>
-      </td>
-      <!-- Spazio -->
-      <td width="4%" class="layout-cell spacer-4"></td>
-      <!-- SPAZIO VUOTO (Per mantenere l'allineamento della tabella) -->
-      <td width="48%" class="layout-cell"></td>
-    </tr>
+  <!-- Inseriamo un div con overflow-x per permettere lo scorrimento orizzontale pulito -->
+  <div style="overflow-x: auto; max-width: 100%;">
+    <!-- Fissiamo la tabella a 1300px per costringerla a non schiacciare i grafici -->
+    <table class="layout-table" style="width: 1300px; min-width: 1300px; margin-bottom: 20px;">
+      <!-- PRIMA RIGA: 3 Grafici Affiancati -->
+      <tr>
+        <!-- GRAFICO A BARRE (ODL) -->
+        <td width="420" class="layout-cell" style="vertical-align: top;">
+          <div class="chart-box">
+            <img src="{{ grafico_base64_odl }}" width="420" height="500" alt="Grafico ODL"
+              style="display: block; margin: 0 auto;">
+          </div>
+        </td>
 
-    <!-- SPAZIO VERTICALE -->
-    <tr>
-      <td colspan="3" style="height: 20px;"></td>
-    </tr>
+        <!-- Spazio di separazione (20px) -->
+        <td width="20" class="layout-cell"></td>
 
-    <!-- TERZA RIGA: Area YTD (Larghezza Piena 100%) -->
+        <!-- GRAFICO A TORTA (RDI) -->
+        <td width="420" class="layout-cell" style="vertical-align: top;">
+          <div class="chart-box">
+            <img src="{{ grafico_base64_rdi }}" width="420" height="500" alt="Grafico RDI"
+              style="display: block; margin: 0 auto;">
+          </div>
+        </td>
+
+        <!-- Spazio di separazione (20px) -->
+        <td width="20" class="layout-cell"></td>
+
+        <!-- GRAFICO A CIAMBELLA (Apparecchiature) -->
+        <td width="420" class="layout-cell" style="vertical-align: top;">
+          <div class="chart-box">
+            <img src="{{ grafico_base64_app }}" width="420" height="500" alt="Grafico Apparecchiature"
+              style="display: block; margin: 0 auto;">
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- SECONDA RIGA: Area YTD (Fuori dallo scorrimento, torna a larghezza normale) -->
+  <table class="layout-table" style="width: 100%;">
     <tr>
-      <td colspan="3" class="layout-cell">
+      <td class="layout-cell" align="center">
         <div class="chart-box">
-          <!-- IL NUOVO GRAFICO YTD -->
-          <img src="{{ grafico_base64_ytd }}" alt="Andamento ODL YTD">
+          <!-- Il grafico YTD lo lasciamo fluido al 100% della pagina dell'email -->
+          <img src="{{ grafico_base64_ytd }}" alt="Andamento ODL YTD"
+            style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
         </div>
       </td>
     </tr>
