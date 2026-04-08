@@ -115,6 +115,7 @@ def build_html_report(
         # Variabili per l'intestazione e i sottotitoli
         nome=nome_tecnico,
         data_gen=datetime.now().strftime("%d/%m/%Y %H:%M"),
+        periodo_rif=f"01/01/{datetime.now().year} - {datetime.now().strftime('%d/%m/%Y')}",
         
         # Variabili per valorizzare le 4 card in verde in alto nel report
         IN_CORSO=ODL_IN_CORSO,

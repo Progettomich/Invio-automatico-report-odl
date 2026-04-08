@@ -36,10 +36,10 @@ DATE_FROM = "2026-01-01"
 # Viene usato per filtrare i dati per tecnico e per inviare i report
 TECNICI = {
     "Addamo Federico":       "federico.addamo@humanitas.it",
-    "Urbina Zabaleta Maria": "maria.urbinazabaleta@humanitas.it",
-    "Pietragalla Canio":     "canio.pietragalla@humanitas.it",
+    #"Urbina Zabaleta Maria": "maria.urbinazabaleta@humanitas.it",
+    #"Pietragalla Canio":     "canio.pietragalla@humanitas.it",
     # "Galimberti Carlo":      "c.galimberti@humanitas.it",
-    "Rizzo Alessandro":      "alessandro.rizzo@humanitas.it",
+    #"Rizzo Alessandro":      "alessandro.rizzo@humanitas.it",
     # "Ghilardotti Gilberto":  "g.ghilardotti@humanitas.it",
     # "Valentino Angelo":      "a.valentino@humanitas.it"
 }
