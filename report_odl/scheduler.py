@@ -80,19 +80,40 @@ def scheduled_report_steps():
     # 5. Per ciascun tecnico costruisce il report HTML e lo invia via email
     for tecnico, df_tecnico in tecnici_dict.items():
 
-        # Recupera l'email del tecnico dal dizionario TECNICI in config.py
+        # =====================================================================
+        # 1° CONTROLLO DI SICUREZZA: Email esistente
+        # =====================================================================
         email_dest = TECNICI.get(tecnico, "")
-
         if not email_dest:
-            print(f"[{tecnico}] Email non trovata nel config, salto.")
+            print(f"[{tecnico}] ⚠️ SALTO: Email non trovata nel config.")
             continue
 
-        num_odl_tecnico = df_num_odl.get(tecnico)
+        # =====================================================================
+        # 2° CONTROLLO DI SICUREZZA: Il tecnico ha almeno un ODL nell'anno?
+        # =====================================================================
+        # df_tecnico è il DataFrame estratto in precedenza da process_data()
+        # Se è vuoto o None, significa che il tecnico non ha ODL attivi/storici recenti.
+        if df_tecnico is None or df_tecnico.empty:
+            print(f"[{tecnico}] ⚠️ SALTO: Nessun ODL trovato per questo periodo. (Nuovo tecnico o nessun ticket assegnato)")
+            continue
 
-        # Generazione grafico ODL
-        print(f"[{tecnico}] generazione grafico ODL in corso.")
+        # =====================================================================
+        # 3° CONTROLLO DI SICUREZZA: Controlliamo che l'API non abbia fallito
+        # =====================================================================
+        num_odl_tecnico = df_num_odl.get(tecnico)
+        if not isinstance(num_odl_tecnico, dict) or not num_odl_tecnico:
+            print(f"[{tecnico}] ⚠️ SALTO: Nessun conteggio ODL (dizionario vuoto). Dati insufficienti per generare i grafici.")
+            continue
+
+        # Se supera tutti e tre i controlli, significa che il tecnico è "sano" 
+        # e ha dati su cui lavorare. Procediamo con la grafica!
+        print(f"\n[{tecnico}] ✅ Controllo superato. Generazione report in corso...")
+
+        # Generazione grafico ODL (Codice che hai già)
         grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
         grafico_odl_b64 = grafico_to_base64(grafico_odl_raw) 
+        
+        # ... RESTO DEL TUO CODICE CHE SCARICA LE RDI E CREA I GRAFICI ... 
 
         # ====================================================================
         # --- NUOVO GRAFICO YTD: Estrazione dati e creazione immagine isolata
