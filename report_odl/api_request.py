@@ -1,3 +1,5 @@
+# api_request.py
+
 # Libreria per effettuare chiamate HTTP verso le API
 import requests
 
@@ -261,3 +263,85 @@ def fetch_rdi(
 
     
     return risultati
+
+# ============================================================
+# NUOVA CHIAMATA API: ANDAMENTO YTD PER GRAFICO AD AREE
+# ============================================================
+def fetch_dati_andamento_ytd_per_persona(tecnico, user=None, password=None):
+    """
+    Scarica gli ODL dell'anno corrente e dell'anno precedente per un singolo tecnico,
+    fermandosi alla data odierna (YTD), al fine di generare il grafico comparativo.
+    Non altera in alcun modo i dati delle altre chiamate.
+    """
+    if user is None:
+        user = API_USER
+    if password is None:
+        password = API_PASS
+
+    print(f"[{tecnico}] Inizio fetch dati andamento YTD...")
+
+    # Usa lo stesso endpoint reportistico degli ODL
+    endpoint_url = f"{API_ENDPOINT}{ODL_REPORT_ENDPOINT}"
+    
+    oggi = datetime.today()
+    anno_corr = oggi.year
+    anno_prec = anno_corr - 1
+    
+    inizio_corr = f"{anno_corr}-01-01"
+    inizio_prec = f"{anno_prec}-01-01"
+    fine_corr = oggi.strftime('%Y-%m-%d')
+    
+    # Gestione anni bisestili per l'anno precedente
+    try:
+        fine_prec = oggi.replace(year=anno_prec).strftime('%Y-%m-%d')
+    except ValueError:
+        fine_prec = oggi.replace(year=anno_prec, day=28).strftime('%Y-%m-%d')
+
+    # Status e parametri base (limit alto per evitare paginazione)
+    stati_richiesti = "IN CORSO,SOSPESO,DA FARE,CONCLUSO"
+    limit_massimo = 2000
+
+    params_corrente = {
+        "user": user,
+        "password": password,
+        "limit": limit_massimo,
+        "page": 1,
+        "stato": stati_richiesti,
+        "tecnico": tecnico,
+        "dateFrom": inizio_corr,
+        "dateTo": fine_corr
+    }
+
+    params_precedente = {
+        "user": user,
+        "password": password,
+        "limit": limit_massimo,
+        "page": 1,
+        "stato": stati_richiesti,
+        "tecnico": tecnico,
+        "dateFrom": inizio_prec,
+        "dateTo": fine_prec
+    }
+
+    risultato_corrente = []
+    risultato_precedente = []
+
+    try:
+        # Chiamata API Anno Corrente
+        resp_corr = requests.get(endpoint_url, params=params_corrente, timeout=15)
+        if resp_corr.status_code == 200:
+            data_corr = resp_corr.json()
+            if isinstance(data_corr, dict) and "data" in data_corr and "recordset" in data_corr["data"]:
+                risultato_corrente = data_corr["data"]["recordset"]
+
+        # Chiamata API Anno Precedente
+        resp_prec = requests.get(endpoint_url, params=params_precedente, timeout=15)
+        if resp_prec.status_code == 200:
+            data_prec = resp_prec.json()
+            if isinstance(data_prec, dict) and "data" in data_prec and "recordset" in data_prec["data"]:
+                risultato_precedente = data_prec["data"]["recordset"]
+
+    except requests.exceptions.RequestException as e:
+        print(f"[{tecnico}] Errore API durante andamento YTD: {e}")
+
+    return risultato_corrente, risultato_precedente

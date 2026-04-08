@@ -1,3 +1,4 @@
+# processing.py
 # Modulo per l'elaborazione e la pulizia dei dati grezzi ricevuti dall'API
 
 import pandas as pd
@@ -233,3 +234,51 @@ def predict_next_rdi(dati_rdi_massivi: list) -> pd.DataFrame:
     top5["intervallo_medio_giorni"] = top5["intervallo_medio_giorni"].round(1)
 
     return top5
+
+# ============================================================
+# NUOVA FUNZIONE: ELABORAZIONE ODL YTD (CUMULATIVI)
+# ============================================================
+def elabora_ytd_odl(dati_json: list, data_inizio: str, data_fine: str) -> pd.DataFrame:
+    """
+    Riceve il JSON grezzo dall'API (elenco ODL in un dato periodo),
+    conta gli ODL per ogni giorno, riempie i buchi del calendario con zeri,
+    e calcola la somma cumulativa.
+    Restituisce un DataFrame pronto per Plotly con l'asse X allineato a un anno bisestile fisso (2024).
+    """
+    # 1. Se non ci sono dati, creiamo un DataFrame "piatto" con soli zeri
+    if not dati_json or not isinstance(dati_json, list):
+        df_vuoto = pd.DataFrame({'Data': pd.date_range(start=data_inizio, end=data_fine)})
+        df_vuoto['Totale_Cumulato'] = 0
+        df_vuoto['Asse_X'] = df_vuoto['Data'].apply(lambda x: x.replace(year=2024))
+        return df_vuoto
+
+    df = pd.DataFrame(dati_json)
+    
+    # Se per qualche motivo manca la colonna della data, restituiamo DataFrame piatto
+    if 'DATA_ODL' not in df.columns:
+        df_vuoto = pd.DataFrame({'Data': pd.date_range(start=data_inizio, end=data_fine)})
+        df_vuoto['Totale_Cumulato'] = 0
+        df_vuoto['Asse_X'] = df_vuoto['Data'].apply(lambda x: x.replace(year=2024))
+        return df_vuoto
+
+    # 2. Conversione date (solo la parte della data, escludendo l'ora se presente)
+    df['DATA_ODL'] = pd.to_datetime(df['DATA_ODL'], errors='coerce').dt.floor('d')
+    df = df.dropna(subset=['DATA_ODL'])
+    
+    # 3. Raggruppamento per contare gli ODL di ogni singola giornata
+    conteggio = df.groupby('DATA_ODL').size().reset_index(name='Nuovi_ODL')
+    conteggio.set_index('DATA_ODL', inplace=True)
+    
+    # 4. Creazione del calendario completo (per coprire weekend e giorni senza ODL)
+    calendario = pd.date_range(start=data_inizio, end=data_fine)
+    df_completo = conteggio.reindex(calendario, fill_value=0).reset_index()
+    df_completo.rename(columns={'index': 'Data'}, inplace=True)
+    
+    # 5. Calcolo somma cumulativa (progressiva)
+    df_completo['Totale_Cumulato'] = df_completo['Nuovi_ODL'].cumsum()
+    
+    # 6. Allineamento per sovrapposizione: forziamo l'anno a 2024 (bisestile)
+    # Questo permette a Plotly di disegnare l'anno scorso e l'anno in corso sugli stessi mesi
+    df_completo['Asse_X'] = df_completo['Data'].apply(lambda x: x.replace(year=2024))
+    
+    return df_completo

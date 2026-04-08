@@ -1,3 +1,5 @@
+# graph.py
+
 # Libreria per la creazione di grafici interattivi
 import plotly.graph_objects as go
 
@@ -274,6 +276,82 @@ def genera_grafico_torta_apparecchiature(df_rdi_storico):
             # (Nessun entrywidth o forzatura delle colonne qui)
         )
     )
+    return fig
+
+# ============================================================
+# NUOVO GRAFICO: ANDAMENTO YTD AD AREE SOVRAPPOSTE (ODL)
+# ============================================================
+def crea_grafico_ytd(df_anno_scorso, df_anno_corrente):
+    """
+    Genera un grafico a linee riempite (aree) che sovrappone i dati progressivi (cumulativi)
+    dell'anno in corso con quelli dell'anno precedente, usando i mesi sull'asse X.
+    """
+    fig = go.Figure()
+
+    # Serie 1: Anno precedente (Azzurro chiaro, posizionato sotto)
+    if not df_anno_scorso.empty and "Totale_Cumulato" in df_anno_scorso.columns:
+        fig.add_trace(go.Scatter(
+            x=df_anno_scorso['Asse_X'], 
+            y=df_anno_scorso['Totale_Cumulato'],
+            mode='lines',
+            name='Anno Precedente',
+            line=dict(width=3, color='rgba(135, 206, 250, 1)'), # LightSkyBlue
+            fill='tozeroy',  
+            fillcolor='rgba(135, 206, 250, 0.3)' # Trasparenza 30%
+        ))
+
+    # Serie 2: Anno corrente (Blu scuro, posizionato sopra)
+    if not df_anno_corrente.empty and "Totale_Cumulato" in df_anno_corrente.columns:
+        fig.add_trace(go.Scatter(
+            x=df_anno_corrente['Asse_X'], 
+            y=df_anno_corrente['Totale_Cumulato'],
+            mode='lines',
+            name='Anno Corrente',
+            line=dict(width=3, color='rgba(70, 130, 180, 1)'), # SteelBlue
+            fill='tonexty', # Riempie lo spazio tra la curva corrente e quella precedente
+            fillcolor='rgba(70, 130, 180, 0.2)' # Trasparenza 20%
+        ))
+
+    # Impostazione Asse X: Mostra solo i nomi dei mesi e disabilita gli anni falsi
+    fig.update_xaxes(
+        title_text="Mese dell'anno",
+        tickformat="%B",       # Nome intero del mese
+        dtick="M1",            # Tick mensili
+        ticklabelmode="period"
+    )
+    
+    # Impostazione Asse Y
+    fig.update_yaxes(title_text="Totale ODL Progressivo")
+
+    # Layout generale
+    # Imposto larghezza/altezza simili ai tuoi altri grafici (es: larghezza larga per stare su un'unica riga orizzontale in basso, o su 2 colonne a 480px)
+    fig.update_layout(
+        title=dict(
+            text="Andamento ODL Cumulato (YTD)",
+            x=0.5,
+            xanchor='center'
+        ),
+        width=960,
+        height=450,
+        # 1. Aumentiamo il margine inferiore (b=100) per fare spazio fisico alla legenda
+        margin=dict(l=50, r=30, t=50, b=100),
+        
+        # 2. Spostiamo la legenda in basso (y negativo)
+        legend=dict(
+            orientation='h',       # Mantiene la legenda in orizzontale
+            yanchor='top',         # Ancoraggio dall'alto della legenda
+            y=-0.25,               # Valore negativo la spinge SOTTO l'asse X e il suo titolo
+            xanchor='center',      # Mantiene il centraggio orizzontale
+            x=0.5                  # Mantiene il centraggio orizzontale
+        ),
+        hovermode='x unified',
+        plot_bgcolor='white'
+    )
+    
+    # Aggiunta griglia leggera per migliorare la lettura
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#eaeaea')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#eaeaea')
+
     return fig
 
 # ============================================================

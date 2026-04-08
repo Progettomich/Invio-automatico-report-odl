@@ -280,6 +280,25 @@
           <img src="{{ grafico_base64_app }}" alt="Grafico Apparecchiature">
         </div>
       </td>
+      <!-- Spazio -->
+      <td width="4%" class="layout-cell spacer-4"></td>
+      <!-- SPAZIO VUOTO (Per mantenere l'allineamento della tabella) -->
+      <td width="48%" class="layout-cell"></td>
+    </tr>
+
+    <!-- SPAZIO VERTICALE -->
+    <tr>
+      <td colspan="3" style="height: 20px;"></td>
+    </tr>
+
+    <!-- TERZA RIGA: Area YTD (Larghezza Piena 100%) -->
+    <tr>
+      <td colspan="3" class="layout-cell">
+        <div class="chart-box">
+          <!-- IL NUOVO GRAFICO YTD -->
+          <img src="{{ grafico_base64_ytd }}" alt="Andamento ODL YTD">
+        </div>
+      </td>
     </tr>
   </table>
 

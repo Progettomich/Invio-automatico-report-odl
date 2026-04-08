@@ -1,3 +1,5 @@
+# html_report.py
+
 # Modulo per gestire i percorsi dei file in modo indipendente dal sistema operativo
 import os
 # Modulo per la manipolazione e l'analisi dei dati tabellari
@@ -16,6 +18,7 @@ def build_html_report(
     grafico_odl_b64: str,
     grafico_rdi_b64: str,
     grafico_app_b64: str,
+     grafico_ytd_b64: str = "",
     previsioni_rdi: pd.DataFrame = None
 ) -> str:
     """
@@ -124,6 +127,7 @@ def build_html_report(
         grafico_base64_odl=grafico_odl_b64,
         grafico_base64_rdi=grafico_rdi_b64,
         grafico_base64_app=grafico_app_b64,
+        grafico_base64_ytd=grafico_ytd_b64,
         
         # Liste di dati passate al template per popolare dinamicamente le righe delle tabelle
         odl_list=odl_list,

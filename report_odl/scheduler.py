@@ -1,3 +1,5 @@
+# scheduler.py
+
 # Libreria per la gestione dello scheduling automatico dei task
 import schedule
 
@@ -11,10 +13,10 @@ from datetime import datetime
 import os
 
 # Importazione delle funzioni per il recupero dei dati dall'API
-from api_request import fetch_numero_odl, fetch_odl_per_responsabili, fetch_rdi
+from api_request import fetch_numero_odl, fetch_odl_per_responsabili, fetch_rdi, fetch_dati_andamento_ytd_per_persona
 
 # Importazione delle funzioni per l'elaborazione dei dati
-from processing import process_data, process_rdi, predict_next_rdi
+from processing import process_data, process_rdi, predict_next_rdi, elabora_ytd_odl
 
 # Importazione della funzione per la costruzione del report HTML
 from html_report import build_html_report
@@ -26,7 +28,7 @@ from email_sender import send_report
 from config import TECNICI, PROFILI, API_USER, API_PASS, CC_EMAILS
 
 # Importazione delle funzioni per la generazione dei grafici
-from graph import genera_grafico_plotly, genera_grafico_torta_rdi, genera_grafico_torta_apparecchiature, grafico_to_base64
+from graph import genera_grafico_plotly, genera_grafico_torta_rdi, genera_grafico_torta_apparecchiature, grafico_to_base64, crea_grafico_ytd
 
 def scheduled_report_steps():
     """
@@ -92,6 +94,32 @@ def scheduled_report_steps():
         grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
         grafico_odl_b64 = grafico_to_base64(grafico_odl_raw) 
 
+        # ====================================================================
+        # --- NUOVO GRAFICO YTD: Estrazione dati e creazione immagine isolata
+        # ====================================================================
+        print(f"[{tecnico}] Scarico dati e genero grafico andamento YTD ad aree.")
+        anno_corr = datetime.today().year
+        anno_prec = anno_corr - 1
+        
+        inizio_corr = f"{anno_corr}-01-01"
+        inizio_prec = f"{anno_prec}-01-01"
+        fine_corr = datetime.today().strftime('%Y-%m-%d')
+        
+        try:
+            fine_prec = datetime.today().replace(year=anno_prec).strftime('%Y-%m-%d')
+        except ValueError: # Sicurezza per gli anni bisestili
+            fine_prec = datetime.today().replace(year=anno_prec, day=28).strftime('%Y-%m-%d')
+            
+        # 1. Chiamata API
+        json_corr, json_prec = fetch_dati_andamento_ytd_per_persona(tecnico, API_USER, API_PASS)
+        # 2. Elaborazione Pandas
+        df_corr = elabora_ytd_odl(json_corr, inizio_corr, fine_corr)
+        df_prec = elabora_ytd_odl(json_prec, inizio_prec, fine_prec)
+        # 3. Creazione immagine
+        grafico_ytd_raw = crea_grafico_ytd(df_prec, df_corr)
+        grafico_ytd_b64 = grafico_to_base64(grafico_ytd_raw)
+        # ====================================================================
+
         # Trova il profilo del tecnico per pescare solo le sue RDI
         profilo_tecnico = PROFILI.get(tecnico)
 
@@ -153,6 +181,7 @@ def scheduled_report_steps():
             grafico_odl_b64="cid:grafico_odl.png",  
             grafico_rdi_b64="cid:grafico_rdi.png",
             grafico_app_b64="cid:grafico_app.png",
+            grafico_ytd_b64="cid:grafico_ytd.png",
             previsioni_rdi=df_previsioni
         )
 
@@ -171,6 +200,10 @@ def scheduled_report_steps():
         ).replace(
             "cid:grafico_app.png", 
             f"data:image/png;base64,{grafico_app_b64}"
+        ).replace(
+            # --- NUOVO GRAFICO YTD: Aggiunto al debug locale ---
+            "cid:grafico_ytd.png", 
+            f"data:image/png;base64,{grafico_ytd_b64}"
         )
         
         with open(percorso_file, "w", encoding="utf-8") as file_html:
@@ -198,6 +231,13 @@ def scheduled_report_steps():
                 "content": grafico_app_b64,
                 "encoding": "base64",
                 "cid": "grafico_app.png"
+            },
+            # --- NUOVO GRAFICO YTD: Aggiunto all'elenco allegati dell'email ---
+            {
+                "filename": "grafico_ytd.png",
+                "content": grafico_ytd_b64,
+                "encoding": "base64",
+                "cid": "grafico_ytd.png"
             }
         ]
 
