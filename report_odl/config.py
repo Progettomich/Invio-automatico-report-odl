@@ -18,6 +18,26 @@ API_PASS = os.getenv("API_PASS")   # password per autenticazione API
 # Indirizzo IP del server su cui gira l'API, letto dal file .env
 API_BASE = os.getenv("API_BASE")
 
+# =====================================================================
+# CONTROLLO DI SICUREZZA: Verifica la presenza delle variabili d'ambiente
+# =====================================================================
+variabili_mancanti = []
+if not API_USER: 
+    variabili_mancanti.append("API_USER")
+if not API_PASS: 
+    variabili_mancanti.append("API_PASS")
+if not API_BASE: 
+    variabili_mancanti.append("API_BASE")
+
+# Se manca anche solo una variabile vitale, ferma immediatamente il programma
+if variabili_mancanti:
+    raise EnvironmentError(
+        f"❌ ERRORE CRITICO ALL'AVVIO: Impossibile avviare l'applicazione.\n"
+        f"Mancano le seguenti variabili nel file .env: {', '.join(variabili_mancanti)}\n"
+        f"Assicurati che il file .env esista nella cartella principale e sia compilato correttamente."
+    )
+# =====================================================================
+
 # URL base completo dell'API, costruito unendo l'indirizzo IP e il percorso fisso
 API_ENDPOINT = f"{API_BASE}/api/v1/zMaintenance"
 
@@ -29,7 +49,6 @@ NUMERO_ODL_ENDPOINT = "/odl/number"     # endpoint per scaricare il numero di OD
 
 # Data di inizio del filtro per il recupero dei dati storici
 DATE_FROM = "2026-01-01"
-
 
 # --- Lista tecnici e relative email ---
 # Dizionario che associa il nome di ogni tecnico alla sua email aziendale

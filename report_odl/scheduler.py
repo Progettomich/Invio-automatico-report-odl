@@ -12,6 +12,9 @@ from datetime import datetime
 # Libreria per gestire i percorsi dei file
 import os
 
+# Libreria per tracciare e stampare gli errori (aggiunta per la sicurezza)
+import traceback
+
 # Importazione delle funzioni per il recupero dei dati dall'API
 from api_request import fetch_numero_odl, fetch_odl_per_responsabili, fetch_rdi, fetch_dati_andamento_ytd_per_persona
 
@@ -44,7 +47,7 @@ def scheduled_report_steps():
     print("Scarico gli ODL per i tecnici.")
     df_all = fetch_odl_per_responsabili(API_USER, API_PASS, first_day_date, today_date)
 
-    # 1. Scarica numero ODL per ogni tecnico tramite l'API
+    # 1.2 Scarica numero ODL per ogni tecnico tramite l'API
     print("Scarico numero ODL per i tecnici.")
     df_num_odl = fetch_numero_odl(API_USER, API_PASS, first_day_date, today_date)
 
@@ -59,7 +62,7 @@ def scheduled_report_steps():
     print("Scarico RDI massivo per GRAFICO TORTA (limit 10000)")
     rdi_grafico_tutti = fetch_rdi(user=API_USER, password=API_PASS, limit=10000, page=1, stato="CREATA", orderBy="desc")
 
-    # NUOVO: 2.2 Scarica lo STORICO RDI (Piano B: due chiamate separate con limite 150.000)
+    # 2.2 Scarica lo STORICO RDI (Piano B: due chiamate separate con limite 150.000)
     print("Scarico RDI massivo per PREVISIONI GUASTI (stato: CREATA)")
     rdi_storico_create = fetch_rdi(user=API_USER, password=API_PASS, limit=150000, page=1, stato="CREATA", orderBy="desc")
     
@@ -71,7 +74,7 @@ def scheduled_report_steps():
     tecnici_dict = process_data(df_all)
 
     # ----------------------------------------------------
-    # NUOVO: Crea una cartella "report_locali" se non esiste
+    # Crea una cartella "report_locali" se non esiste
     # ----------------------------------------------------
     output_dir = "report_locali"
     if not os.path.exists(output_dir):
@@ -113,10 +116,9 @@ def scheduled_report_steps():
         grafico_odl_raw = genera_grafico_plotly(num_odl_tecnico)
         grafico_odl_b64 = grafico_to_base64(grafico_odl_raw) 
         
-        # ... RESTO DEL TUO CODICE CHE SCARICA LE RDI E CREA I GRAFICI ... 
 
         # ====================================================================
-        # --- NUOVO GRAFICO YTD: Estrazione dati e creazione immagine isolata
+        # GRAFICO YTD: Estrazione dati e creazione immagine isolata
         # ====================================================================
         print(f"[{tecnico}] Scarico dati e genero grafico andamento YTD ad aree.")
         anno_corr = datetime.today().year
@@ -171,7 +173,7 @@ def scheduled_report_steps():
         df_rdi_storico = process_rdi(rdi_storico_personali)
 
         # ----------------------------------------------------
-        # NUOVO: Calcolo previsioni prossime RDI (Top 5)
+        # Calcolo previsioni prossime RDI (Top 5)
         # ----------------------------------------------------
         df_previsioni = None
         
@@ -253,7 +255,6 @@ def scheduled_report_steps():
                 "encoding": "base64",
                 "cid": "grafico_app.png"
             },
-            # --- NUOVO GRAFICO YTD: Aggiunto all'elenco allegati dell'email ---
             {
                 "filename": "grafico_ytd.png",
                 "content": grafico_ytd_b64,
@@ -272,16 +273,36 @@ def scheduled_report_steps():
             allegati=miei_allegati
         )
 
+# =====================================================================
+# Protegge l'esecuzione da crash fatali
+# =====================================================================
+def safe_scheduled_report_steps():
+    """Esegue il report catturando qualsiasi errore per evitare il blocco del programma"""
+    try:
+        scheduled_report_steps()
+    except Exception as e:
+        print(f"[{datetime.now()}] ❌ ERRORE CRITICO DURANTE L'ESECUZIONE DEL REPORT: {e}")
+        # Stampa l'errore completo per capire in quale riga ha fallito
+        print(traceback.format_exc())
+
 def schedule_report():
     """Schedula l'esecuzione automatica."""
-    schedule.every(1).minutes.do(scheduled_report_steps)
-    # schedule.every().monday.at("08:00").do(scheduled_report_steps)
+    # Sostituita la funzione diretta con quella protetta 'safe_scheduled_report_steps'
+    schedule.every(1).minutes.do(safe_scheduled_report_steps)
+    # schedule.every().monday.at("08:00").do(safe_scheduled_report_steps)
+    
     print(f"[{datetime.now()}] Scheduler avviato: report automatici attivi")
 
     while True:
-        schedule.run_pending()
+        try:
+            # Esegue i task in sospeso, proteggendo il ciclo infinito
+            schedule.run_pending()
+        except Exception as e:
+            print(f"[{datetime.now()}] ❌ Errore interno dello scheduler: {e}")
+            
         time.sleep(30)
 
 if __name__ == "__main__":
     print("Avvio manuale per TEST immediato...")
-    scheduled_report_steps()
+    # Avviamo la funzione protetta anche nel test manuale
+    safe_scheduled_report_steps()
