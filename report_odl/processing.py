@@ -81,6 +81,9 @@ def process_data(dati_grezzi: dict) -> dict:
         oggi = pd.Timestamp(datetime.now().date())
         df['giorni_trascorsi'] = (oggi - df['DATA_ODL']).dt.days
 
+        # Rimuove l'orario e formatta in Anno-Mese-Giorno
+        df['DATA_ODL'] = df['DATA_ODL'].dt.strftime('%Y-%m-%d').fillna('')
+
         # --- FILTRA SOLO LE COLONNE CHE ESISTONO ---
         # Mantieni solo le colonne definite in COLONNE_OUTPUT che esistono nel DataFrame
         colonne_presenti = [c for c in COLONNE_OUTPUT if c in df.columns]

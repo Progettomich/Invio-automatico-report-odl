@@ -102,6 +102,7 @@ def build_html_report(
 
     ODL_IN_CORSO=numero_odl.get("IN_CORSO", 0)
     ODL_SOSPESI=numero_odl.get("SOSPESO", 0)
+    ODL_DA_FARE=numero_odl.get("CONCLUSO", 0)
     ODL_CHIUSI=numero_odl.get("CONCLUSO", 0)
     ODL_TOTALE_APERTI=numero_odl.get("TOTALE_ODL_APERTI", 0)
     ODL_TOTALE_ODL=numero_odl.get("TOTALE_ODL", 0)
@@ -120,6 +121,7 @@ def build_html_report(
         # Variabili per valorizzare le 4 card in verde in alto nel report
         IN_CORSO=ODL_IN_CORSO,
         SOSPESI=ODL_SOSPESI,
+        DA_FARE=ODL_DA_FARE,
         CHIUSI=ODL_CHIUSI,
         TOTALE_ODL_APERTI=ODL_TOTALE_APERTI,
         TOTALE_ODL=ODL_TOTALE_ODL,

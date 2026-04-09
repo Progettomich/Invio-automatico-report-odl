@@ -168,7 +168,7 @@ def genera_grafico_torta_rdi(df_rdi_desc):
     # 6. IMPOSTAZIONI LAYOUT
     fig.update_layout(
         title=dict(
-            text="Distribuzione RDI Non Presi per Reparto",
+            text="Distribuzione RDI Non Prese per Reparto",
             x=0.5,
             xanchor='center'
         ),
@@ -279,7 +279,7 @@ def genera_grafico_torta_apparecchiature(df_rdi_storico):
     return fig
 
 # ============================================================
-# NUOVO GRAFICO: ANDAMENTO YTD AD AREE SOVRAPPOSTE (ODL)
+# ANDAMENTO YTD AD AREE SOVRAPPOSTE (ODL)
 # ============================================================
 def crea_grafico_ytd(df_anno_scorso, df_anno_corrente):
     """

@@ -177,7 +177,7 @@
     <span class="header-icon">📋</span> MICH — Report ODL e RDI — {{ nome }}
   </div>
   <div class="subtitle">Generato il: {{ data_gen }} &nbsp;|&nbsp; <strong>Periodo di riferimento:</strong> {{
-    periodo_rif }}
+    periodo_rif }} (Grafico a torta e a ciambella invece prendono tutte le RDI, non solo dell'anno corrente)
   </div>
 
   <!-- KPI TRASFORMATE IN LAYOUT A TABELLA PER OUTLOOK -->
@@ -217,10 +217,10 @@
       <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
         <table class="kpi-table">
           <tr>
-            <td class="kpi-value">{{ CHIUSI }}</td>
+            <td class="kpi-value">{{ DA_FARE }}</td>
           </tr>
           <tr>
-            <td class="kpi-label">ODL Chiusi</td>
+            <td class="kpi-label">ODL Da fare <br> Appena presi in carico</td>
           </tr>
         </table>
       </td>
@@ -232,10 +232,10 @@
       <td width="18.4%" class="layout-cell" style="max-width: 18.4%; word-wrap: break-word; word-break: break-all;">
         <table class="kpi-table">
           <tr>
-            <td class="kpi-value">{{ TOTALE_ODL_APERTI }}</td>
+            <td class="kpi-value">{{ CHIUSI }}</td>
           </tr>
           <tr>
-            <td class="kpi-label">ODL Totali<br>presi in carico</td>
+            <td class="kpi-label">ODL Chiusi</td>
           </tr>
         </table>
       </td>
@@ -314,7 +314,7 @@
 
   <!-- TABELLA 1: ODL PERSONALI -->
   <div class="section-title">
-    <span class="section-icon">📄</span> Dettaglio Ordini di Lavoro (ODL)
+    <span class="section-icon">📄</span> I tuoi ordini più vecchi (ODL)
   </div>
   <table class="data-table">
     <thead>
@@ -345,7 +345,7 @@
 
   <!-- TABELLA 2: RDI DESC -->
   <div class="section-title">
-    <span class="section-icon">📥</span> RDI Non Presi (Più recenti - Ultimi 10)
+    <span class="section-icon">📥</span> RDI Non Prese (Più recenti - Ultimi 10)
   </div>
   <table class="data-table">
     <thead>
@@ -356,7 +356,7 @@
         <th>APERTA DA</th>
         <th>DESCRIZIONE BENE</th>
         <th>ICH</th>
-        <th>REPARTO O MEDICALCARE</th>
+        <th>REPARTO</th>
       </tr>
     </thead>
     <tbody>
@@ -376,7 +376,7 @@
 
   <!-- TABELLA 3: RDI ASC -->
   <div class="section-title">
-    <span class="section-icon">📤</span> RDI Non Presi (Più vecchi - Primi 10)
+    <span class="section-icon">📤</span> RDI Non Prese (Più vecchie - Primi 10)
   </div>
   <table class="data-table">
     <thead>
