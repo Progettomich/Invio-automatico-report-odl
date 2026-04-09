@@ -102,12 +102,12 @@ def build_html_report(
 
     ODL_IN_CORSO=numero_odl.get("IN_CORSO", 0)
     ODL_SOSPESI=numero_odl.get("SOSPESO", 0)
-    ODL_DA_FARE=numero_odl.get("CONCLUSO", 0)
+    ODL_DA_FARE=numero_odl.get("DA_FARE", 0)
     ODL_CHIUSI=numero_odl.get("CONCLUSO", 0)
     ODL_TOTALE_APERTI=numero_odl.get("TOTALE_ODL_APERTI", 0)
     ODL_TOTALE_ODL=numero_odl.get("TOTALE_ODL", 0)
 
-    print(f"DEBUG: {ODL_IN_CORSO} ODL in corso, {ODL_SOSPESI} ODL sospesi, {ODL_CHIUSI} ODL chiusi, {ODL_TOTALE_APERTI} ODL totali, {ODL_TOTALE_ODL} ODL totali per tutti gli stati.")
+    print(f"DEBUG: {ODL_IN_CORSO} ODL in corso, {ODL_SOSPESI} ODL sospesi, ODL da fare {ODL_DA_FARE}, {ODL_CHIUSI} ODL chiusi, {ODL_TOTALE_APERTI} ODL totali, {ODL_TOTALE_ODL} ODL totali per tutti gli stati.")
 
     # Inietta tutte le variabili e le liste calcolate all'interno del template HTML
     # La funzione .render() andrà a sostituire tutte le parentesi graffe {{ ... }} del file HTML
