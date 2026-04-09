@@ -236,7 +236,7 @@ def predict_next_rdi(dati_rdi_massivi: list) -> pd.DataFrame:
     return top5
 
 # ============================================================
-# NUOVA FUNZIONE: ELABORAZIONE ODL YTD (CUMULATIVI)
+# ELABORAZIONE ODL YTD (CUMULATIVI)
 # ============================================================
 def elabora_ytd_odl(dati_json: list, data_inizio: str, data_fine: str) -> pd.DataFrame:
     """
