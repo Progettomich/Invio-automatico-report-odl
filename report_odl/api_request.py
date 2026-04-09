@@ -75,6 +75,7 @@ def fetch_odl_per_responsabili(
                 endpoint_url,
                 params=params,
                 timeout=10,  # timeout di 10 secondi per evitare attese infinite
+                #timeout =60, # timeout di 60 secondi per evitare di fare collassare il server per la mole di dati cheisti all'api
             )
             print("URL chiamata:", response.url)
 
