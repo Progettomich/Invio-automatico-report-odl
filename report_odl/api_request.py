@@ -6,6 +6,7 @@ import requests
 # Importazione delle costanti di configurazione: endpoint API, credenziali e lista tecnici
 from config import API_ENDPOINT, ODL_REPORT_ENDPOINT, RDI_ENDPOINT, TECNICI, API_USER, API_PASS, NUMERO_ODL_ENDPOINT, PROFILI
 
+# Libreria per lavorare con date e ore
 from datetime import datetime
 
 # ============================================================
@@ -56,15 +57,15 @@ def fetch_odl_per_responsabili(
 
         # Parametri da passare nell'URL della richiesta GET
         params = {
-            "user": user,           # username per autenticazione
-            "password": password,   # password per autenticazione
-            "limit": limit,         # numero massimo di record da ricevere
-            "page": page,           # numero di pagina (paginazione)
-            "stato": stati,         # filtra per stato ODL (IN CORSO, SOSPESO, ecc.)
-            "tecnico": responsabile, # filtra gli ODL per questo specifico tecnico
-            "dateFrom": date_from,  # data di inizio del filtro
-            "dateTo" : date_to, # data di fine del filtro (uguale a date_from per avere solo i dati di quel giorno)
-            "orderBy": order_by,       # ordina i risultati in ordine crescente (più vecchi prima)
+            "user": user,                  # username per autenticazione
+            "password": password,          # password per autenticazione
+            "limit": limit,                # numero massimo di record da ricevere
+            "page": page,                  # numero di pagina (paginazione)
+            "stato": stati,                # filtra per stato ODL (IN CORSO, SOSPESO, ecc.)
+            "tecnico": responsabile,       # filtra gli ODL per questo specifico tecnico
+            "dateFrom": date_from,         # data di inizio del filtro
+            "dateTo" : date_to,            # data di fine del filtro (giorno in cui )
+            "orderBy": order_by,           # ordina i risultati in ordine crescente (più vecchi prima)
         }
 
         print(f"Richiesta per tecnico: {responsabile}")
